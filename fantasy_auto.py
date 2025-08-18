@@ -10,11 +10,12 @@ from fpdf import FPDF
 
 # Configuración de página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide")
-
 st.markdown("", unsafe_allow_html=True)
-
 st.title("⚽ Fantasy XI Assistant")
 st.caption("Calcula tu mejor XI con scraping en tiempo real")
+
+# Tabs principales
+tab1, tab2, tab3, tab4 = st.tabs(["📋 Plantilla", "📊 Datos", "🧮 XI Ideal", "📄 Exportar"])
 
 
 # Utilidades
@@ -303,199 +304,206 @@ def generar_pdf_xi(df_xi) -> bytes:
     return pdf.output(dest='S').encode('latin1')
 
 # UI
-st.subheader("1) Introduce tu plantilla")
 
-# Scrapea automáticamente al iniciar para obtener nombres
-with st.spinner("Cargando lista de jugadores de LaLiga (puede tardar 10-20 segundos)..."):
-    df_laliga = scrape_laliga()
-if df_laliga.empty:
-    st.warning("No se pudo obtener la lista de jugadores de LaLiga para autocompletar.")
-    nombres_laliga = []
-else:
-    nombres_laliga = sorted(df_laliga["Nombre"].unique())
+with tab1:
+    st.subheader("1) Introduce tu plantilla")
 
-POSICIONES = ["POR", "DEF", "CEN", "DEL"]
+    # Scrapea automáticamente al iniciar para obtener nombres
+    with st.spinner("Cargando lista de jugadores de LaLiga (puede tardar 10-20 segundos)..."):
+        df_laliga = scrape_laliga()
+    if df_laliga.empty:
+        st.warning("No se pudo obtener la lista de jugadores de LaLiga para autocompletar.")
+        nombres_laliga = []
+    else:
+        nombres_laliga = sorted(df_laliga["Nombre"].unique())
 
-# Estado para bloques de entrada de plantilla
-if "plantilla_bloques" not in st.session_state:
-    st.session_state.plantilla_bloques = [
-        {"Nombre": "", "Posicion": "", "Precio": None} for _ in range(11)
-    ]
+    POSICIONES = ["POR", "DEF", "CEN", "DEL"]
 
-def add_bloque():
-    st.session_state.plantilla_bloques.append({"Nombre": "", "Posicion": "", "Precio": None})
+    # Estado para bloques de entrada de plantilla
+    if "plantilla_bloques" not in st.session_state:
+        st.session_state.plantilla_bloques = [
+            {"Nombre": "", "Posicion": "", "Precio": None} for _ in range(11)
+        ]
 
-st.write("Introduce tus jugadores uno a uno (puedes añadir hasta 24):")
-for idx, bloque in enumerate(st.session_state.plantilla_bloques):
-    cols = st.columns([3, 1, 1])
-    # Nombre
-    nombre = cols[0].selectbox(
-        f"Nombre jugador {idx+1}",
-        [""] + nombres_laliga,
-        index=nombres_laliga.index(bloque["Nombre"]) + 1 if bloque["Nombre"] in nombres_laliga else 0,
-        key=f"nombre_{idx}",
-    )
-    # Posición
-    pos = cols[1].selectbox(
-        f"Posición {idx+1}",
-        [""] + POSICIONES,
-        index=POSICIONES.index(bloque["Posicion"]) + 1 if bloque["Posicion"] in POSICIONES else 0,
-        key=f"pos_{idx}",
-    )
-    # Precio
-    precio = cols[2].number_input(
-        f"Precio {idx+1} (opcional)", min_value=0, value=int(bloque["Precio"]) if bloque["Precio"] is not None and str(bloque["Precio"]).isdigit() else 0,
-        key=f"precio_{idx}",
-        step=1,
-    )
-    # Actualiza el bloque
-    st.session_state.plantilla_bloques[idx]["Nombre"] = nombre
-    st.session_state.plantilla_bloques[idx]["Posicion"] = pos
-    st.session_state.plantilla_bloques[idx]["Precio"] = precio if precio != 0 else None
+    def add_bloque():
+        st.session_state.plantilla_bloques.append({"Nombre": "", "Posicion": "", "Precio": None})
 
-st.button(
-    "+ Añadir jugador", on_click=add_bloque,
-    disabled=len(st.session_state.plantilla_bloques) >= 24)
+    st.write("Introduce tus jugadores uno a uno (puedes añadir hasta 24):")
+    for idx, bloque in enumerate(st.session_state.plantilla_bloques):
+        cols = st.columns([3, 1, 1])
+        # Nombre
+        nombre = cols[0].selectbox(
+            f"Nombre jugador {idx+1}",
+            [""] + nombres_laliga,
+            index=nombres_laliga.index(bloque["Nombre"]) + 1 if bloque["Nombre"] in nombres_laliga else 0,
+            key=f"nombre_{idx}",
+        )
+        # Posición
+        pos = cols[1].selectbox(
+            f"Posición {idx+1}",
+            [""] + POSICIONES,
+            index=POSICIONES.index(bloque["Posicion"]) + 1 if bloque["Posicion"] in POSICIONES else 0,
+            key=f"pos_{idx}",
+        )
+        # Precio
+        precio = cols[2].number_input(
+            f"Precio {idx+1} (opcional)", min_value=0, value=int(bloque["Precio"]) if bloque["Precio"] is not None and str(bloque["Precio"]).isdigit() else 0,
+            key=f"precio_{idx}",
+            step=1,
+        )
+        # Actualiza el bloque
+        st.session_state.plantilla_bloques[idx]["Nombre"] = nombre
+        st.session_state.plantilla_bloques[idx]["Posicion"] = pos
+        st.session_state.plantilla_bloques[idx]["Precio"] = precio if precio != 0 else None
 
-# Construir DataFrame de plantilla a partir de bloques válidos
-df_plantilla = pd.DataFrame([
-    b for b in st.session_state.plantilla_bloques
-    if b["Nombre"] and b["Posicion"]
-])
+    st.button(
+        "+ Añadir jugador", on_click=add_bloque,
+        disabled=len(st.session_state.plantilla_bloques) >= 24)
 
-if not df_plantilla.empty:
-    st.success(f"Plantilla cargada con {len(df_plantilla)} jugadores.")
-    st.dataframe(df_plantilla, use_container_width=True)
-else:
-    st.info("Introduce al menos un jugador y su posición.")
+    # Construir DataFrame de plantilla a partir de bloques válidos
+    df_plantilla = pd.DataFrame([
+        b for b in st.session_state.plantilla_bloques
+        if b["Nombre"] and b["Posicion"]
+    ])
 
-st.divider()
+    if not df_plantilla.empty:
+        st.success(f"Plantilla cargada con {len(df_plantilla)} jugadores.")
+        st.dataframe(df_plantilla, use_container_width=True)
+    else:
+        st.info("Introduce al menos un jugador y su posición.")
 
-st.subheader("2) Datos de probabilidades obtenidos en tiempo real (puedes consultar todos los jugadores de LaLiga)")
-# El scraping se hace automáticamente, no hay opción de subir CSV externo
-with st.spinner("Scrapeando LaLiga (puede tardar ~10-20s la primera vez)…"):
-    df_datos = scrape_laliga()
-if df_datos.empty:
-    st.warning("No se han podido obtener datos por scraping.")
-else:
-    st.caption(f"Datos cargados: {len(df_datos)} registros.")
-    with st.expander("Ver muestra de datos obtenidos"):
-        st.dataframe(df_datos.head(30), use_container_width=True)
 
-st.divider()
+with tab2:
+    st.subheader("2) Datos de probabilidades obtenidos en tiempo real (puedes consultar todos los jugadores de LaLiga)")
+    # El scraping se hace automáticamente, no hay opción de subir CSV externo
+    with st.spinner("Scrapeando LaLiga (puede tardar ~10-20s la primera vez)…"):
+        df_datos = scrape_laliga()
+    if df_datos.empty:
+        st.warning("No se han podido obtener datos por scraping.")
+    else:
+        st.caption(f"Datos cargados: {len(df_datos)} registros.")
+        with st.expander("Ver muestra de datos obtenidos"):
+            st.dataframe(df_datos.head(30), use_container_width=True)
 
-st.subheader("3) Cálculo del XI ideal")
-cols = st.columns(6)
-min_def = cols[0].number_input("Mín. DEF", 0, 5, 3)
-max_def = cols[1].number_input("Máx. DEF", 0, 5, 5)
-min_cen = cols[2].number_input("Mín. CEN", 0, 5, 3)
-max_cen = cols[3].number_input("Máx. CEN", 0, 5, 5)
-min_del = cols[4].number_input("Mín. DEL", 0, 4, 1)
-max_del = cols[5].number_input("Máx. DEL", 0, 4, 3)
 
-colx = st.columns(3)
-num_por = colx[0].number_input("Nº POR", 0, 2, 1)
-total = colx[1].number_input("Total en XI", 1, 11, 11)
-cutoff = colx[2].slider("Sensibilidad de matching de nombre", 0.0, 1.0, 0.6, 0.05)
+with tab3:
+    st.subheader("3) Cálculo del XI ideal")
+    cols = st.columns(6)
+    min_def = cols[0].number_input("Mín. DEF", 0, 5, 3)
+    max_def = cols[1].number_input("Máx. DEF", 0, 5, 5)
+    min_cen = cols[2].number_input("Mín. CEN", 0, 5, 3)
+    max_cen = cols[3].number_input("Máx. CEN", 0, 5, 5)
+    min_del = cols[4].number_input("Mín. DEL", 0, 4, 1)
+    max_del = cols[5].number_input("Máx. DEL", 0, 4, 3)
 
-btn = st.button("🔍 Calcular mi XI ideal", type="primary", disabled=df_plantilla.empty or df_datos.empty)
+    colx = st.columns(3)
+    num_por = colx[0].number_input("Nº POR", 0, 2, 1)
+    total = colx[1].number_input("Total en XI", 1, 11, 11)
+    cutoff = colx[2].slider("Sensibilidad de matching de nombre", 0.0, 1.0, 0.6, 0.05)
 
-if btn:
-    # Emparejar jugadores de tu plantilla con los del scraping
-    with st.spinner("Emparejando jugadores y calculando XI…"):
-        df_encontrados, no_encontrados = emparejar_con_datos(df_plantilla, df_datos)
-        # Ajustar cutoff si el usuario lo cambia
-        if cutoff != 0.6:
-            df_encontrados = pd.DataFrame()
-            no_encontrados = []
-            for _, row in df_plantilla.iterrows():
-                nombre_usuario = str(row.get("Nombre", "")).strip()
-                pos = normaliza_pos(row.get("Posicion"))
-                precio = row.get("Precio", None)
-                if not nombre_usuario or not pos:
-                    continue
-                match = buscar_nombre_mas_cercano(nombre_usuario, df_datos["Nombre"], cutoff=cutoff)
-                if match:
-                    dj = df_datos[df_datos["Nombre"] == match].iloc[0]
-                    df_encontrados = pd.concat([df_encontrados, pd.DataFrame([{
-                        "Mi_nombre": nombre_usuario,
-                        "Nombre_web": match,
-                        "Equipo": dj["Equipo"],
-                        "Probabilidad": dj["Probabilidad"],
-                        "Probabilidad_num": dj["Probabilidad_num"],
-                        "Posicion": pos,
-                        "Precio": precio
-                    }])], ignore_index=True)
-                else:
-                    no_encontrados.append(nombre_usuario)
+    btn = st.button("🔍 Calcular mi XI ideal", type="primary", disabled=df_plantilla.empty or df_datos.empty)
 
-        if df_encontrados.empty:
-            st.error("No se pudo emparejar ningún jugador. Revisa nombres/posiciones o baja la sensibilidad.")
-        else:
-            # Motor
-            mejor_xi = seleccionar_mejor_xi(
-                df_encontrados,
-                min_def=min_def, max_def=max_def,
-                min_cen=min_cen, max_cen=max_cen,
-                min_del=min_del, max_del=max_del,
-                num_por=num_por, total=total
-            )
-            if not mejor_xi:
-                st.error("No se pudo construir un XI con las restricciones indicadas.")
+    if btn:
+        # Emparejar jugadores de tu plantilla con los del scraping
+        with st.spinner("Emparejando jugadores y calculando XI…"):
+            df_encontrados, no_encontrados = emparejar_con_datos(df_plantilla, df_datos)
+            # Ajustar cutoff si el usuario lo cambia
+            if cutoff != 0.6:
+                df_encontrados = pd.DataFrame()
+                no_encontrados = []
+                for _, row in df_plantilla.iterrows():
+                    nombre_usuario = str(row.get("Nombre", "")).strip()
+                    pos = normaliza_pos(row.get("Posicion"))
+                    precio = row.get("Precio", None)
+                    if not nombre_usuario or not pos:
+                        continue
+                    match = buscar_nombre_mas_cercano(nombre_usuario, df_datos["Nombre"], cutoff=cutoff)
+                    if match:
+                        dj = df_datos[df_datos["Nombre"] == match].iloc[0]
+                        df_encontrados = pd.concat([df_encontrados, pd.DataFrame([{
+                            "Mi_nombre": nombre_usuario,
+                            "Nombre_web": match,
+                            "Equipo": dj["Equipo"],
+                            "Probabilidad": dj["Probabilidad"],
+                            "Probabilidad_num": dj["Probabilidad_num"],
+                            "Posicion": pos,
+                            "Precio": precio
+                        }])], ignore_index=True)
+                    else:
+                        no_encontrados.append(nombre_usuario)
+
+            if df_encontrados.empty:
+                st.error("No se pudo emparejar ningún jugador. Revisa nombres/posiciones o baja la sensibilidad.")
             else:
-                df_xi = pd.DataFrame(mejor_xi)
-                # Mostrar XI
-                st.subheader("✅ Mejor XI recomendado")
-                def color_prob(val):
-                    try:
-                        if isinstance(val, str) and "%" in val:
-                            p = float(val.replace("%", "").replace(",", "."))
-                        else:
-                            p = float(val)
-                    except Exception:
-                        return ""
-                    if p >= 80:
-                        # Verde más oscuro, texto negro
-                        return "background-color: #4CAF50; color: #000000"
-                    if p < 50:
-                        return "background-color: #ffd6d6"
-                    return ""
-                vista = df_xi[["Posicion", "Mi_nombre", "Equipo", "Probabilidad", "Probabilidad_num"]].copy()
-                vista = vista.rename(columns={"Mi_nombre": "Nombre", "Probabilidad_num": "Prob_num"})
-                st.dataframe(vista.style.applymap(color_prob, subset=["Probabilidad", "Prob_num"]), use_container_width=True)
-
-                # Media de probabilidad
-                try:
-                    media = df_xi["Probabilidad_num"].mean()
-                    st.metric("Media de probabilidad del XI", f"{media:.1f}%")
-                except Exception:
-                    pass
-
-                # Banquillo
-                st.subheader("🧩 Banquillo recomendado")
-                banca = df_encontrados[~df_encontrados["Mi_nombre"].isin(df_xi["Mi_nombre"])]
-                if banca.empty:
-                    st.caption("Sin banquillo disponible con los datos cargados.")
-                else:
-                    st.dataframe(
-                        banca[["Posicion", "Mi_nombre", "Equipo", "Probabilidad", "Probabilidad_num"]]
-                        .sort_values("Probabilidad_num", ascending=False),
-                        use_container_width=True
-                    )
-
-                # Descargar PDF
-                st.subheader("📄 Exportar")
-                pdf_bytes = generar_pdf_xi(df_xi)
-                st.download_button(
-                    "Descargar XI en PDF",
-                    data=pdf_bytes,
-                    file_name="mejor_xi.pdf",
-                    mime="application/pdf"
+                # Motor
+                mejor_xi = seleccionar_mejor_xi(
+                    df_encontrados,
+                    min_def=min_def, max_def=max_def,
+                    min_cen=min_cen, max_cen=max_cen,
+                    min_del=min_del, max_del=max_del,
+                    num_por=num_por, total=total
                 )
+                if not mejor_xi:
+                    st.error("No se pudo construir un XI con las restricciones indicadas.")
+                else:
+                    df_xi = pd.DataFrame(mejor_xi)
+                    # Mostrar XI
+                    st.subheader("✅ Mejor XI recomendado")
+                    def color_prob(val):
+                        try:
+                            if isinstance(val, str) and "%" in val:
+                                p = float(val.replace("%", "").replace(",", "."))
+                            else:
+                                p = float(val)
+                        except Exception:
+                            return ""
+                        if p >= 80:
+                            # Verde más oscuro, texto negro
+                            return "background-color: #4CAF50; color: #000000"
+                        if p < 50:
+                            return "background-color: #ffd6d6"
+                        return ""
+                    vista = df_xi[["Posicion", "Mi_nombre", "Equipo", "Probabilidad", "Probabilidad_num"]].copy()
+                    vista = vista.rename(columns={"Mi_nombre": "Nombre", "Probabilidad_num": "Prob_num"})
+                    st.dataframe(vista.style.applymap(color_prob, subset=["Probabilidad", "Prob_num"]), use_container_width=True)
 
-                # Avisos de no encontrados
-                if no_encontrados:
-                    st.warning("No se encontraron coincidencias para: " + ", ".join(sorted(set(no_encontrados))))
+                    # Media de probabilidad
+                    try:
+                        media = df_xi["Probabilidad_num"].mean()
+                        st.metric("Media de probabilidad del XI", f"{media:.1f}%")
+                    except Exception:
+                        pass
+
+                    # Banquillo
+                    st.subheader("🧩 Banquillo recomendado")
+                    banca = df_encontrados[~df_encontrados["Mi_nombre"].isin(df_xi["Mi_nombre"])]
+                    if banca.empty:
+                        st.caption("Sin banquillo disponible con los datos cargados.")
+                    else:
+                        st.dataframe(
+                            banca[["Posicion", "Mi_nombre", "Equipo", "Probabilidad", "Probabilidad_num"]]
+                            .sort_values("Probabilidad_num", ascending=False),
+                            use_container_width=True
+                        )
+
+                    # Avisos de no encontrados
+                    if no_encontrados:
+                        st.warning("No se encontraron coincidencias para: " + ", ".join(sorted(set(no_encontrados))))
+
+
+with tab4:
+    st.subheader("📄 Exportar")
+    # Exportar PDF solo si se ha calculado el XI y df_xi existe
+    if "df_xi" in locals() and not df_xi.empty:
+        pdf_bytes = generar_pdf_xi(df_xi)
+        st.download_button(
+            "Descargar XI en PDF",
+            data=pdf_bytes,
+            file_name="mejor_xi.pdf",
+            mime="application/pdf"
+        )
+    else:
+        st.info("Calcula primero tu XI ideal para poder exportar el PDF.")
 
 # Footer mini
 st.markdown("---")
