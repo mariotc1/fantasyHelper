@@ -10,6 +10,9 @@ from fpdf import FPDF
 
 # Configuración de página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide")
+
+st.markdown("", unsafe_allow_html=True)
+
 st.title("⚽ Fantasy XI Assistant")
 st.caption("Calcula tu mejor XI con scraping en tiempo real")
 
@@ -322,7 +325,7 @@ if "plantilla_bloques" not in st.session_state:
 def add_bloque():
     st.session_state.plantilla_bloques.append({"Nombre": "", "Posicion": "", "Precio": None})
 
-st.write("Introduce tus jugadores uno a uno (puedes añadir más de 11 si lo necesitas):")
+st.write("Introduce tus jugadores uno a uno (puedes añadir hasta 24):")
 for idx, bloque in enumerate(st.session_state.plantilla_bloques):
     cols = st.columns([3, 1, 1])
     # Nombre
