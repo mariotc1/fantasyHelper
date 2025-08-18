@@ -505,6 +505,32 @@ with tab4:
     else:
         st.info("Calcula primero tu XI ideal para poder exportar el PDF.")
 
-# Footer mini
-st.markdown("---")
-st.caption("Tip: puedes actualizar el motor de decisión en este mismo archivo y el despliegue en Streamlit Cloud se actualizará solo cuando hagas push a GitHub.")
+# Footer fijo abajo con CSS
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #ffffff;
+        text-align: center;
+        padding: 8px;
+        z-index: 9999;
+        border-top: 1px solid #ccc;
+    }
+    @media (prefers-color-scheme: dark) {
+        .footer {
+            background-color: #0e1117;
+        }
+    }
+    </style>
+    <div class="footer">
+        <p style='font-size: 14px; color: gray;'>
+        Tip: Usa el asistente el día antes de la jornada para obtener las mejores probabilidades
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
