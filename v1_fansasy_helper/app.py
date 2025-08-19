@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-from motor_decision import seleccionar_mejor_xi
+from v1_fansasy_helper.motor_decision import seleccionar_mejor_xi
 
 # Configuración de la página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide")

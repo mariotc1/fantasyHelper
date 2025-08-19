@@ -15,7 +15,7 @@ st.title("⚽ Fantasy XI Assistant")
 st.caption("Calcula tu mejor XI con scraping en tiempo real")
 
 # Tabs principales
-tab1, tab2, tab3, tab4 = st.tabs(["📋 Plantilla", "📊 Datos", "🧮 XI Ideal", "📄 Exportar"])
+tab1, tab2, tab3, tab4 = st.tabs(["Tu Plantilla", "Datos Obtenidos", "Tu XI Ideal", "Exportar a PDF"])
 
 
 # Utilidades
