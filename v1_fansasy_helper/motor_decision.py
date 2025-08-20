@@ -52,7 +52,7 @@ orden_pos = {"POR": 0, "DEF": 1, "CEN": 2, "MED": 2, "DEL": 3}
 mejor_xi = sorted(mejor_xi, key=lambda x: orden_pos.get(x["Posicion"].upper(), 99))
 
 # Mostrar en consola
-print("\n=== MEJOR XI RECOMENDADO ===")
+print("\n MEJOR XI RECOMENDADO ")
 for jugador in mejor_xi:
     print(f"{jugador['Posicion']} - {jugador['Mi_nombre']} ({jugador['Equipo']}) - {jugador['Probabilidad']}")
 

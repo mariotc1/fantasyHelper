@@ -347,8 +347,7 @@ def generar_html_campo(df_xi) -> str:
     return full_html
 
 
-# UI
-
+# UI de la web
 # Título y subtítulo
 st.title("Fantasy XI Assistant")
 st.caption("Calcula tu alineación ideal con datos de probabilidad en tiempo real")

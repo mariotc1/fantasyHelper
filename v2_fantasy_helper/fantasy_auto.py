@@ -1,12 +1,8 @@
-# Fantasy XI Assistant - Versión unificada "para tontos"
-# Ejecuta: streamlit run fantasy_auto.py
-
 import time,re, difflib, requests
 import pandas as pd
 import streamlit as st
 from bs4 import BeautifulSoup
 from fpdf import FPDF
-
 
 # Configuración de página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide")
@@ -16,7 +12,6 @@ st.caption("Calcula tu mejor XI con scraping en tiempo real")
 
 # Tabs principales
 tab1, tab2, tab3, tab4 = st.tabs(["Tu Plantilla", "Datos Obtenidos", "Tu XI Ideal", "Exportar a PDF"])
-
 
 # Utilidades
 def limpiar_porcentaje(x):
@@ -53,6 +48,7 @@ def parsear_plantilla_pegada(texto):
         linea = linea.strip()
         if not linea:
             continue
+        
         # separar por coma o punto y coma
         partes = [p.strip() for p in re.split(r"[;,]", linea)]
         if len(partes) < 2:
@@ -63,9 +59,11 @@ def parsear_plantilla_pegada(texto):
                 nombre = " ".join(trozos[:-1])
                 filas.append({"Nombre": nombre, "Posicion": pos, "Precio": None})
             continue
+        
         nombre, pos = partes[0], partes[1]
         precio = partes[2] if len(partes) >= 3 else None
         filas.append({"Nombre": nombre, "Posicion": pos, "Precio": precio})
+    
     df = pd.DataFrame(filas)
     if df.empty:
         return df
@@ -78,10 +76,11 @@ def df_desde_csv_subido(file):
     except Exception:
         file.seek(0)
         df = pd.read_excel(file)
-    # Intentar normalizar columnas frecuentes
+    
+    # normalizar columnas frecuentes
     col_map = {c.lower(): c for c in df.columns}
     # Nombres esperados: Nombre, Posicion, Precio
-    # Intentar renombrar
+    # renombrar
     rename = {}
     for target in ["Nombre", "Posicion", "Precio"]:
         # buscar por lower
