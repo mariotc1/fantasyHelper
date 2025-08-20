@@ -1,6 +1,3 @@
-# Fantasy XI Assistant - Versión Mejorada con Estética y UX
-# Ejecuta: streamlit run fantasy_auto.py
-
 import time, re, difflib, requests
 import pandas as pd
 import streamlit as st
@@ -8,14 +5,12 @@ import streamlit.components.v1 as components
 from bs4 import BeautifulSoup
 from fpdf import FPDF
 
-
-# --- CONFIGURACIÓN DE PÁGINA ---
+# Configuración de la página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
 
-# --- ESTILOS CSS PERSONALIZADOS (NUEVO) ---
+# Estilos CSS para la web
 st.markdown("""
 <style>
-    /* Mejora la estética de los botones y componentes */
     .stButton>button {
         border-radius: 20px;
         border: 1px solid #4F8BF9;
@@ -25,7 +20,7 @@ st.markdown("""
         border: 1px solid #0B5ED7;
         color: #0B5ED7;
     }
-    /* Botón primario más destacado */
+    
     .stButton[aria-label="🔍 Calcular mi XI ideal"]>button {
         color: white;
         background-color: #4F8BF9;
@@ -36,13 +31,11 @@ st.markdown("""
     .stButton[aria-label="🔍 Calcular mi XI ideal"]>button:hover {
         background-color: #0B5ED7;
     }
-    /* Estilo para las métricas */
     div[data-testid="metric-container"] {
         background-color: rgba(230, 240, 255, 0.5);
         border-radius: 10px;
         padding: 15px;
     }
-    /* Footer */
     .footer {
         position: fixed;
         left: 0;
@@ -66,7 +59,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-# --- UTILIDADES (sin cambios, las funciones originales son sólidas) ---
+# Funciones de utilidad
 def limpiar_porcentaje(x):
     if pd.isna(x): return None
     m = re.search(r"(\d+(?:[.,]\d+)?)\s*%", str(x))
@@ -118,7 +111,7 @@ def df_desde_csv_subido(file):
     return df
 
 
-# --- SCRAPING ---
+# Proceso de scraping de datos de LaLiga
 EQUIPOS_URLS = {
     "Alavés": "https://www.futbolfantasy.com/laliga/equipos/alaves",
     "Athletic Club": "https://www.futbolfantasy.com/laliga/equipos/athletic",
@@ -181,7 +174,7 @@ def scrape_laliga():
     return df.reset_index(drop=True)
 
 
-# --- LÓGICA DE MATCHING Y XI ---
+# Lógica de matching y XI
 def buscar_nombre_mas_cercano(nombre, serie_nombres, cutoff=0.6):
     if not isinstance(nombre, str) or serie_nombres.empty: return None
     cand = difflib.get_close_matches(nombre, serie_nombres.tolist(), n=1, cutoff=cutoff)
@@ -231,7 +224,7 @@ def seleccionar_mejor_xi(df, min_def=3, max_def=5, min_cen=3, max_cen=5, min_del
     return eleccion[:total]
 
 
-# --- EXPORTACIÓN A PDF ---
+# Exportar el XI a PDF
 def generar_pdf_xi(df_xi) -> bytes:
     pdf = FPDF()
     pdf.add_page()
@@ -252,7 +245,7 @@ def generar_pdf_xi(df_xi) -> bytes:
     except Exception: pass
     return pdf.output(dest='S').encode('latin1')
 
-# NUEVO: FUNCIÓN MEJORADA Y ROBUSTA PARA MOSTRAR XI EN CAMPO DE FÚTBOL
+# Función para mostrar el XI en un campo de fútbol
 def generar_html_campo(df_xi) -> str:
     """
     Genera un string HTML completo con el campo de fútbol y los jugadores.
@@ -354,10 +347,10 @@ def generar_html_campo(df_xi) -> str:
     return full_html
 
 
-# --- INTERFAZ DE USUARIO (UI) ---
+# UI
 
-# MODIFICADO: Título y subtítulo más atractivos
-st.title("⚽ Fantasy XI Assistant Pro")
+# Título y subtítulo
+st.title("Fantasy XI Assistant")
 st.caption("Calcula tu alineación ideal con datos de probabilidad en tiempo real")
 
 # Carga de datos al inicio
@@ -368,10 +361,10 @@ if df_laliga.empty:
 nombres_laliga = sorted(df_laliga["Nombre"].unique())
 
 
-# --- BARRA LATERAL (NUEVO) ---
+# Barra lateral de configuración
 with st.sidebar:
-    st.image("https://img.icons8.com/color/96/000000/football2.png", width=80)
-    st.header("⚙️ Configuración del XI")
+    st.image("https://play-lh.googleusercontent.com/xx7OVI90d-d6pvQlqmAAeUo4SzvLsrp9uss8XPO1ZwILEeTCpjYFVRuL550bUqlicy0=w240-h480-rw", width=80)
+    st.header("Configuración para crear el XI")
 
     cutoff = st.slider("Sensibilidad de matching de nombres", 0.3, 1.0, 0.6, 0.05,
                        help="Un valor más bajo puede encontrar más coincidencias si los nombres no son exactos, pero puede cometer errores.")
@@ -395,14 +388,15 @@ with st.sidebar:
         st.dataframe(df_laliga, use_container_width=True)
 
 
-# --- PESTAÑAS PRINCIPALES (MODIFICADO) ---
+# Pesta principal con tabs
 tab1, tab2 = st.tabs(["1️⃣ Introduce tu Plantilla", "2️⃣ Tu XI Ideal y Banquillo"])
 
 with tab1:
     st.subheader("Añade los jugadores de tu equipo")
     df_plantilla = pd.DataFrame()
 
-    # NUEVO: Múltiples métodos de entrada
+    # Múltiples métodos de entrada de la plantilla del usuario
+    st.caption("Puedes añadir tus jugadores de tres maneras diferentes. Elige la que prefieras:")
     input_method_tab1, input_method_tab2, input_method_tab3 = st.tabs(["✍️ Uno a uno", "📋 Pegar lista", "📁 Subir archivo"])
 
     with input_method_tab1:
@@ -430,7 +424,7 @@ with tab1:
             df_plantilla = df_plantilla_manual
 
     with input_method_tab2:
-        texto_plantilla = st.text_area("Pega tu plantilla aquí", "Ej: Courtois, POR\nVinicius, DEL, 100\nBellingham; CEN", height=250,
+        texto_plantilla = st.text_area("Pega tu plantilla aquí (Ej: Courtois,POR)", height=250,
                                         help="Formato: Nombre, Posición, Precio (opcional). Separado por comas o punto y coma.")
         if texto_plantilla:
             df_plantilla_pegada = parsear_plantilla_pegada(texto_plantilla)
@@ -496,7 +490,7 @@ with tab2:
                     st.dataframe(banca[["Posicion", "Mi_nombre", "Equipo", "Probabilidad"]], use_container_width=True)
 
                 # Exportar a PDF (NUEVO: movido aquí)
-                st.subheader("📄 Exportar")
+                st.subheader("📄 Exportar a PDF tu XI ideal")
                 pdf_bytes = generar_pdf_xi(df_xi)
                 st.download_button("Descargar XI en PDF", data=pdf_bytes, file_name="mi_fantasy_xi.pdf", mime="application/pdf")
 
