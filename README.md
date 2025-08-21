@@ -8,7 +8,7 @@ Una aplicación web creada con Streamlit que te ayuda a calcular tu alineación 
 
 ---
 
-### 🚀 [**>> ACCEDE A LA APLICACIÓN EN VIVO AQUÍ <<**](https://xi-fantasy.streamlit.app/) 🚀
+### 🚀 [**>> ACCEDE A LA APLICACIÓN AQUÍ <<**](https://xi-fantasy.streamlit.app/) 🚀
 
 ---
 
