@@ -408,34 +408,57 @@ with tab1:
 
     # Métodos de entrada de plantilla
     with input_method_tab1:
-        st.caption("Añade jugadores y asígnales una posición. Puedes añadir o eliminar filas.")
+        st.caption("Añade o elimina jugadores en sus tarjetas individuales")
+
         if "plantilla_bloques" not in st.session_state:
             st.session_state.plantilla_bloques = [{"id": i, "Nombre": "", "Posicion": ""} for i in range(11)]
 
-        POSICIONES = ["", "POR", "DEF", "CEN", "DEL"]
+        # Listas con placeholders
+        POSICIONES_CON_PLACEHOLDER = ["Elige una posición...", "POR", "DEF", "CEN", "DEL"]
+        NOMBRES_CON_PLACEHOLDER = ["Selecciona un jugador..."] + nombres_laliga
         
+        # Itero sobre cada bloque para crear su propio card
         for i, bloque in enumerate(st.session_state.plantilla_bloques):
-            c1, c2, c3 = st.columns([4, 2, 1])
-            nombre = c1.selectbox(f"Nombre jugador {i+1}", [""] + nombres_laliga,
-                                  index=nombres_laliga.index(bloque["   Nombre"]) + 1 if bloque["Nombre"] in nombres_laliga else 0,
-                                  key=f"nombre_{bloque['id']}", label_visibility="collapsed")
-            pos = c2.selectbox(f"Posición {i+1}", POSICIONES,
-                               index=POSICIONES.index(bloque["Posicion"]) if bloque["Posicion"] in POSICIONES else 0,
-                               key=f"pos_{bloque['id']}", label_visibility="collapsed")
-            
-            if c3.button("🗑️", key=f"del_{bloque['id']}", help="Eliminar jugador"):
-                st.session_state.plantilla_bloques.pop(i)
-                st.rerun()
+            # Contenedor para agrupar visualmente cada jugador
+            with st.container(border=True):
+                c1, c2 = st.columns([0.85, 0.15]) # Columna principal y columna para el botón
+                
+                # Columna 1: Inputs de Nombre y Posición
+                with c1:
+                    # Determino el índice correcto para el nombre
+                    idx_nombre = NOMBRES_CON_PLACEHOLDER.index(bloque["Nombre"]) if bloque["Nombre"] else 0
+                    nombre = st.selectbox(f"Nombre Jugador {i+1}", NOMBRES_CON_PLACEHOLDER, 
+                                          index=idx_nombre, key=f"nombre_{bloque['id']}", 
+                                          label_visibility="collapsed")
+                    
+                    # Determino el índice correcto para la posición
+                    idx_pos = POSICIONES_CON_PLACEHOLDER.index(bloque["Posicion"]) if bloque["Posicion"] else 0
+                    pos = st.selectbox(f"Posición Jugador {i+1}", POSICIONES_CON_PLACEHOLDER, 
+                                       index=idx_pos, key=f"pos_{bloque['id']}", 
+                                       label_visibility="collapsed")
 
-            st.session_state.plantilla_bloques[i]["Nombre"] = nombre
-            st.session_state.plantilla_bloques[i]["Posicion"] = pos
+                # Columna 2: Botón de Eliminar 
+                with c2:
+                    # Añado un poco de espacio para alinear mejor el botón verticalmente
+                    st.markdown("<br/>", unsafe_allow_html=True) 
+                    if st.button("🗑️", key=f"del_{bloque['id']}", help="Eliminar jugador"):
+                        st.session_state.plantilla_bloques.pop(i)
+                        st.rerun()
 
+                # Actualizo el estado para no guardar los placeholders
+                st.session_state.plantilla_bloques[i]["Nombre"] = nombre if nombre != "Selecciona un jugador..." else ""
+                st.session_state.plantilla_bloques[i]["Posicion"] = pos if pos != "Elige una posición..." else ""
+
+        # Botón para añadir una nueva tarjeta de jugador
         if st.button("➕ Añadir jugador"):
-            new_id = int(time.time() * 1000) # Usar timestamp para un ID único
+            new_id = int(time.time() * 1000)
             st.session_state.plantilla_bloques.append({"id": new_id, "Nombre": "", "Posicion": ""})
             st.rerun()
 
-        df_plantilla_manual = pd.DataFrame([b for b in st.session_state.plantilla_bloques if b["Nombre"] and b["Posicion"]])
+        # Proceso los datos finales para el cálculo
+        df_plantilla_manual = pd.DataFrame(
+            [b for b in st.session_state.plantilla_bloques if b.get("Nombre") and b.get("Posicion")]
+        )
         if not df_plantilla_manual.empty:
             df_plantilla = df_plantilla_manual.drop(columns=['id']).drop_duplicates(subset=["Nombre"])
 
