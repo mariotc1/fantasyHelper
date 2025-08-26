@@ -91,24 +91,31 @@ def parsear_plantilla_pegada(texto):
     for linea in texto.splitlines():
         linea = linea.strip()
         if not linea: continue
-        
-        partes = [p.strip() for p in re.split(r"\s*[,;]\s*", linea)]
-        if len(partes) < 2:
+
+        # Expresión regular más flexible y robusta: Grupo 1: Nombre, Grupo 2: Posición y opcionalmente Grupo 3: Precio
+        # Permite comas, puntos y comas, o solo espacios como separadores
+        match = re.match(r"^(.*?)(?:[;,]|\s+)\s*(POR|DEF|CEN|DEL|GK|DF|MC|DC|FW)\s*(?:[;,]|\s+)?(.*)$", linea, re.IGNORECASE)
+
+        if match:
+            nombre = match.group(1).strip()
+            pos = match.group(2).strip()
+            precio_str = match.group(3).strip() if match.group(3) else None
+            filas.append({"Nombre": nombre, "Posicion": pos, "Precio": precio_str})
+        else:
+            # Si la regex falla, intentamos un método más simple por si acaso
             trozos = linea.split()
             if len(trozos) >= 2:
                 pos = trozos[-1]
                 nombre = " ".join(trozos[:-1])
-                filas.append({"Nombre": nombre, "Posicion": pos, "Precio": None})
-            continue
-        
-        nombre, pos = partes[0], partes[1]
-        precio = partes[2] if len(partes) >= 3 else None
-        filas.append({"Nombre": nombre, "Posicion": pos, "Precio": precio})
+                # Validamos si la supuesta posición es válida
+                if normaliza_pos(pos) in ["POR", "DEF", "CEN", "DEL"]:
+                     filas.append({"Nombre": nombre, "Posicion": pos, "Precio": None})
     
+    if not filas:
+        return pd.DataFrame()
+
     df = pd.DataFrame(filas)
-    if df.empty: return df
     df["Posicion"] = df["Posicion"].apply(normaliza_pos)
-    
     df = df.drop_duplicates(subset=["Nombre"])
     return df
 
