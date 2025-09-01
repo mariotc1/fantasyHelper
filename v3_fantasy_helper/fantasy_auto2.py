@@ -582,6 +582,27 @@ with tab2:
         components.html(html_campo, height=750, scrolling=False)
         st.caption("Los colores indican la probabilidad de titularidad: 🟩 Muy Alta | 🟨 Probable | 🟥 Duda")
 
+        # Botones para compartir en redes sociales
+        st.divider()
+        st.subheader("¡Comparte tu XI con tus rivales!")
+        
+        # Texto a compartir
+        url_app = "https://xi-fantasy.streamlit.app/"
+        texto_twitter = f"¡Este es mi XI ideal para la jornada, calculado con el Asistente Fantasy! 🔥 ¿Crees que puedes superarlo? 😏 {url_app} #FantasyLaLiga #Biwenger #Comunio"
+        texto_whatsapp = f"¡Este es mi XI ideal para la jornada, calculado con el Asistente Fantasy! 🔥 Échale un ojo y dime qué te parece: {url_app}"
+
+        # Enlaces para compartir
+        link_twitter = f"https://twitter.com/intent/tweet?text={texto_twitter.replace(' ', '%20')}"
+        link_whatsapp = f"https://api.whatsapp.com/send?text={texto_whatsapp.replace(' ', '%20')}"
+
+        # Botones usando markdown para que se vean mejor
+        c1, c2 = st.columns(2)
+        with c1:
+            st.markdown(f'<a href="{link_twitter}" target="_blank" style="text-decoration: none;"><button style="width:100%; height:50px; border-radius:10px; background-color:#1DA1F2; color:white; border:none; font-weight:bold;">Compartir en Twitter</button></a>', unsafe_allow_html=True)
+        with c2:
+            st.markdown(f'<a href="{link_whatsapp}" target="_blank" style="text-decoration: none;"><button style="width:100%; height:50px; border-radius:10px; background-color:#25D366; color:white; border:none; font-weight:bold;">Compartir en WhatsApp</button></a>', unsafe_allow_html=True)
+        st.divider()
+
         st.header("Banquillo Recomendado")
         st.caption("Ordenado por probabilidad de jugar")
         banca = st.session_state.banca
