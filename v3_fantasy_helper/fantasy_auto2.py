@@ -26,6 +26,8 @@ def inject_ga():
 # Configuración de la página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
 
+inject_ga()
+
 # incicializo el objeto de LocalStorage para poder guardar y leer datos del navegador
 localS = LocalStorage()
 
