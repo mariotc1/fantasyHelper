@@ -11,13 +11,13 @@ st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sid
 
 st.markdown("""
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-F1RJYWPS30"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0VYQV3HLQ0"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-F1RJYWPS30');
+  gtag('config', 'G-0VYQV3HLQ0');
 </script>
 """, unsafe_allow_html=True)
 
