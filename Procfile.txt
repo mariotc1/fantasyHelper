@@ -1,0 +1,1 @@
+web: streamlit run v3_fantasy_helper/fantasy_auto2.py

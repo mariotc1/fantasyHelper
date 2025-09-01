@@ -10,6 +10,17 @@ from streamlit_local_storage import LocalStorage
 # Configuración de la página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
 
+st.markdown("""
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0VYQV3HLQ0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-0VYQV3HLQ0');
+</script>
+""", unsafe_allow_html=True)
 # incicializo el objeto de LocalStorage para poder guardar y leer datos del navegador
 localS = LocalStorage()
 
