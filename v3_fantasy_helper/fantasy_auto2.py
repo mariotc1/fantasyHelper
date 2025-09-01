@@ -6,6 +6,23 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 from streamlit_local_storage import LocalStorage
 
+
+# Código de Google Analytics
+def inject_ga():
+    GA_ID = "G-F1RJYWPS30" # ID de Google Analytics
+
+    GA_SCRIPT = f"""
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){{dataLayer.push(arguments);}}
+          gtag('js', new Date());
+          gtag('config', '{GA_ID}');
+        </script>
+    """
+    components.html(GA_SCRIPT, height=0)
+
 # Configuración de la página
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
 
