@@ -32,7 +32,9 @@ def emparejar_con_datos(plantilla_df, datos_df, cutoff=0.6):
                 "Probabilidad": dj["Probabilidad"],
                 "Probabilidad_num": dj["Probabilidad_num"],
                 "Posicion": pos,
-                "Precio": precio
+                "Precio": precio,
+                "Imagen_URL": dj.get("Imagen_URL"),
+                "Perfil_URL": dj.get("Perfil_URL")
             })
         else:
             no_encontrados.append(nombre_usuario)

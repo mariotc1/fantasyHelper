@@ -45,7 +45,7 @@ def scrape_laliga():
             candidates = soup.select(".jugador, .player, .player-card, .lista-jugadores .row, .media")
             
             for node in candidates:
-                nombre, prob = None, None
+                nombre, prob, imagen_url, perfil_url = None, None, None, None
                 # Búsqueda robusta del nombre
                 for sel in [".nombre", ".name", ".player-name", ".media-body strong", "strong"]:
                     tag = node.select_one(sel)
@@ -67,10 +67,25 @@ def scrape_laliga():
                     m = re.search(r"(\d{1,3}\s?%)", node.get_text(" ", strip=True))
                     if m: prob = m.group(1)
 
+                # Búsqueda de imagen y perfil
+                img_tag = node.select_one("img[data-src]")
+                if img_tag:
+                    imagen_url = img_tag.get("data-src")
+
+                a_tag = node.select_one("a[href*='/jugadores/']")
+                if a_tag:
+                    perfil_url = a_tag.get("href")
+
                 # Añadir si se encontraron ambos datos y son válidos
                 if nombre and prob:
                     if "JugadorJugadorJugador" in nombre or "Prob.Prob" in prob: continue
-                    all_rows.append({"Equipo": equipo, "Nombre": nombre, "Probabilidad": prob})
+                    all_rows.append({
+                        "Equipo": equipo, 
+                        "Nombre": nombre, 
+                        "Probabilidad": prob,
+                        "Imagen_URL": imagen_url,
+                        "Perfil_URL": perfil_url
+                    })
             
             time.sleep(0.2) # Pequeña pausa para no saturar el servidor
         
