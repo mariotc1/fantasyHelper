@@ -56,7 +56,7 @@ Si quieres ejecutar este proyecto en tu propia máquina, sigue estos pasos:
 4.  **Ejecuta la aplicación:**
     El punto de entrada principal de la aplicación se encuentra en la carpeta `v3_fantasy_helper`.
     ```bash
-    streamlit run v3_fantasy_helper/app.py
+    streamlit run v3_fantasy_helper/fantasy_auto2.py.py
     ```
 
 La aplicación se abrirá automáticamente en tu navegador.
