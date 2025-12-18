@@ -82,7 +82,7 @@ def generar_bytes_imagen(df_xi: pd.DataFrame, df_banca: pd.DataFrame) -> bytes:
     html_content = generar_html_alineacion_completa(df_xi, df_banca, render_for_screenshot=True)
     
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(args=["--no-sandbox", "--disable-dev-shm-usage"])
         page = browser.new_page()
         # Establecer un viewport adecuado para la captura
         page.set_viewport_size({"width": 600, "height": 1000})
