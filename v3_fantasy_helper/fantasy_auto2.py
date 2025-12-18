@@ -1,4 +1,5 @@
 import time
+import base64
 import json
 import pandas as pd
 import streamlit as st
@@ -9,7 +10,7 @@ from streamlit_local_storage import LocalStorage
 from src.scraper import scrape_laliga
 from src.data_utils import parsear_plantilla_pegada, df_desde_csv_subido
 from src.core import emparejar_con_datos, seleccionar_mejor_xi, buscar_nombre_mas_cercano
-from src.output_generators import generar_pdf_xi, generar_html_campo
+from src.output_generators import generar_pdf_xi, generar_html_alineacion_completa, generar_bytes_imagen
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
@@ -219,44 +220,53 @@ with tab2:
                 st.session_state.df_encontrados = df_encontrados
 
     if "df_xi" in st.session_state:
-        df_xi, df_encontrados = st.session_state.df_xi, st.session_state.df_encontrados
-        media_prob = df_xi["Probabilidad_num"].mean()
-
+        df_xi = st.session_state.df_xi
+        banca = st.session_state.banca
+        df_encontrados = st.session_state.df_encontrados
+        
         st.header("Tu XI Ideal Recomendado")
         c1, c2 = st.columns(2)
         c1.metric("Jugadores Encontrados", f"{len(df_encontrados)} / {len(df_plantilla)}")
-        c2.metric("Probabilidad Media del XI", f"{media_prob:.1f}%")
+        c2.metric("Probabilidad Media del XI", f"{df_xi['Probabilidad_num'].mean():.1f}%")
 
-        components.html(generar_html_campo(df_xi), height=750, scrolling=False)
+        with st.spinner("Generando imagen y enlaces de descarga..."):
+            # 1. Generar todos los artefactos
+            pdf_bytes = generar_pdf_xi(df_xi)
+            image_bytes = generar_bytes_imagen(df_xi, banca)
+            
+            # 2. Codificar a Base64
+            pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
+            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
 
-        st.divider()
-        st.subheader("¡Comparte tu XI con tus rivales!")
+        # 3. Preparar enlaces de compartir
         url_app = "https://xi-fantasy.streamlit.app/"
-        texto_twitter = f"¡Este es mi XI ideal para la jornada, calculado con el Asistente Fantasy! 🔥 ¿Puedes superarlo? 😏 {url_app} #FantasyLaLiga"
+        texto_twitter = f"¡Este es mi XI ideal para la jornada, calculado con el Asistente Fantasy! 🔥 ¿Puedes superarlo? 😏 {url_app} #FantasyLaLiga #LALIGAFANTASY"
         texto_whatsapp = f"¡Este es mi XI ideal para la jornada, calculado con el Asistente Fantasy! 🔥 Échale un ojo: {url_app}"
-        link_twitter = f"https://twitter.com/intent/tweet?text={texto_twitter.replace(' ', '%20')}"
+        link_twitter = f"https://x.com/intent/tweet?text={texto_twitter.replace(' ', '%20')}"
         link_whatsapp = f"https://api.whatsapp.com/send?text={texto_whatsapp.replace(' ', '%20')}"
+        
+        # 4. Calcular altura dinámica y renderizar el componente HTML unificado
+        num_suplentes = len(banca)
+        altura_base = 700
+        if num_suplentes > 0:
+            filas_suplentes = -(-num_suplentes // 5)
+            altura_adicional = 100 + (filas_suplentes * 150)
+            altura_total = altura_base + altura_adicional
+        else:
+            altura_total = altura_base
 
-        c1, c2 = st.columns(2)
-        c1.markdown(f'<a href="{link_twitter}" target="_blank" style="text-decoration: none;"><button style="width:100%; height:50px; border-radius:10px; background-color:#1DA1F2; color:white; border:none; font-weight:bold;">Compartir en Twitter</button></a>', unsafe_allow_html=True)
-        c2.markdown(f'<a href="{link_whatsapp}" target="_blank" style="text-decoration: none;"><button style="width:100%; height:50px; border-radius:10px; background-color:#25D366; color:white; border:none; font-weight:bold;">Compartir en WhatsApp</button></a>', unsafe_allow_html=True)
-        st.divider()
+        components.html(
+            generar_html_alineacion_completa(df_xi, banca, pdf_base64, image_base64, link_twitter, link_whatsapp), 
+            height=altura_total, 
+            scrolling=False
+        )
 
-        st.header("Banquillo Recomendado")
-        banca = st.session_state.banca
-        if banca.empty: st.caption("No hay jugadores en el banquillo.")
-        else: st.dataframe(banca[["Posicion", "Mi_nombre", "Equipo", "Probabilidad"]], use_container_width=True)
-
-        st.header("Exportar XI a PDF")
-        st.download_button("Descargar XI en PDF", data=generar_pdf_xi(df_xi), file_name="mi_fantasy_xi.pdf", mime="application/pdf")
-
-        no_encontrados = st.session_state.no_encontrados
-        if no_encontrados:
+        # 5. Mostrar jugadores no encontrados
+        if st.session_state.no_encontrados:
             with st.expander("⚠️ Algunos jugadores no fueron encontrados", expanded=True):
-                st.warning("No se encontraron coincidencias para: " + ", ".join(sorted(set(no_encontrados))))
-                sugerencias = [f"Para '{n}', ¿quizás quisiste decir **{sug}**?" for n in no_encontrados if (sug := buscar_nombre_mas_cercano(n, df_laliga['Nombre'], 0.5))]
+                st.warning("No se encontraron coincidencias para: " + ", ".join(sorted(set(st.session_state.no_encontrados))))
+                sugerencias = [f"Para '{n}', ¿quizás quisiste decir **{sug}**?" for n in st.session_state.no_encontrados if (sug := buscar_nombre_mas_cercano(n, df_laliga['Nombre'], 0.5))]
                 if sugerencias: st.info("💡 Sugerencias:\n- " + "\n- ".join(sugerencias))
-                st.info("Consejo: Revisa la ortografía o ajusta la 'Sensibilidad de matching' en la barra lateral.")
 
 # --- FOOTER ---
 st.markdown("<div class='footer'><p style='font-size: 14px; color: gray;'>Tip: Usa el asistente el día antes de la jornada para obtener las mejores probabilidades</p></div>", unsafe_allow_html=True)
