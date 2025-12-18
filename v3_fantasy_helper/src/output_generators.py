@@ -75,30 +75,12 @@ def _generar_card_html(jugador: pd.Series) -> str:
     </div>
     """
 
-from playwright.sync_api import sync_playwright
 
-def generar_bytes_imagen(df_xi: pd.DataFrame, df_banca: pd.DataFrame) -> bytes:
-    """Genera una imagen PNG del campo y el banquillo usando Playwright."""
-    html_content = generar_html_alineacion_completa(df_xi, df_banca, render_for_screenshot=True)
-    
-    with sync_playwright() as p:
-        browser = p.chromium.launch(args=["--no-sandbox", "--disable-dev-shm-usage"])
-        page = browser.new_page()
-        # Establecer un viewport adecuado para la captura
-        page.set_viewport_size({"width": 600, "height": 1000})
-        page.set_content(html_content)
-        # Esperar a que las fuentes e imágenes carguen
-        page.wait_for_load_state('networkidle')
-        # Tomar captura del body, que se autoajusta al contenido
-        image_bytes = page.locator('body').screenshot(type='png')
-        browser.close()
-        return image_bytes
 
 def generar_html_alineacion_completa(
     df_xi: pd.DataFrame, 
     df_banca: pd.DataFrame = None,
     pdf_base64: str = None,
-    image_base64: str = None,
     link_twitter: str = "#",
     link_whatsapp: str = "#",
     render_for_screenshot: bool = False
@@ -146,14 +128,6 @@ def generar_html_alineacion_completa(
             </a>
             """
         
-        img_link_html = ""
-        if image_base64:
-            img_link_html = f"""
-            <a href="data:image/png;base64,{image_base64}" download="fantasy_xi.png" class="action-btn img-btn" title="Descargar XI como Imagen">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9Z" /></svg>
-            </a>
-            """
-
         action_buttons_html = f"""
         <div class="action-buttons">
             <div class="share-menu">
@@ -169,7 +143,6 @@ def generar_html_alineacion_completa(
                     </a>
                 </div>
             </div>
-            {img_link_html}
             {pdf_link_html}
         </div>
         """

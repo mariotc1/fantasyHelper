@@ -10,7 +10,7 @@ from streamlit_local_storage import LocalStorage
 from src.scraper import scrape_laliga
 from src.data_utils import parsear_plantilla_pegada, df_desde_csv_subido
 from src.core import emparejar_con_datos, seleccionar_mejor_xi, buscar_nombre_mas_cercano
-from src.output_generators import generar_pdf_xi, generar_html_alineacion_completa, generar_bytes_imagen
+from src.output_generators import generar_pdf_xi, generar_html_alineacion_completa
 
 # --- CONFIGURACIÓN DE PÁGINA Y ESTILOS ---
 st.set_page_config(page_title="Fantasy XI Assistant", layout="wide", initial_sidebar_state="expanded")
@@ -229,14 +229,12 @@ with tab2:
         c1.metric("Jugadores Encontrados", f"{len(df_encontrados)} / {len(df_plantilla)}")
         c2.metric("Probabilidad Media del XI", f"{df_xi['Probabilidad_num'].mean():.1f}%")
 
-        with st.spinner("Generando imagen y enlaces de descarga..."):
+        with st.spinner("Generando enlaces de descarga..."):
             # 1. Generar todos los artefactos
             pdf_bytes = generar_pdf_xi(df_xi)
-            image_bytes = generar_bytes_imagen(df_xi, banca)
             
             # 2. Codificar a Base64
             pdf_base64 = base64.b64encode(pdf_bytes).decode("utf-8")
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
 
         # 3. Preparar enlaces de compartir
         url_app = "https://xi-fantasy.streamlit.app/"
@@ -256,7 +254,7 @@ with tab2:
             altura_total = altura_base
 
         components.html(
-            generar_html_alineacion_completa(df_xi, banca, pdf_base64, image_base64, link_twitter, link_whatsapp), 
+            generar_html_alineacion_completa(df_xi, banca, pdf_base64, link_twitter, link_whatsapp), 
             height=altura_total, 
             scrolling=False
         )
