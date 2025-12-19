@@ -407,3 +407,150 @@ def generar_html_alineacion_completa(
     </html>
     """
     return full_html
+
+
+def generar_html_grid_jugadores(
+    df_jugadores: pd.DataFrame,
+    titulo: str = "Jugadores de tu Plantilla"
+) -> str:
+    """
+    Genera una visualización HTML de una lista de jugadores en un grid responsivo.
+    """
+    # 1. Construir HTML del grid
+    grid_html = ""
+    if df_jugadores is not None and not df_jugadores.empty:
+        grid_html = f'<div class="bench-title"><span>{titulo} ({len(df_jugadores)})</span></div>'
+        grid_html += '<div class="bench-container">'
+        for _, jugador in df_jugadores.iterrows():
+            grid_html += _generar_card_html(jugador)
+        grid_html += '</div>'
+
+    # 2. HTML completo con CSS y JS
+    full_html = f"""
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+            * {{ box-sizing: border-box; }}
+            body {{
+                margin: 0; padding: 10px 0; font-family: 'Inter', sans-serif; background: transparent;
+                display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+            }}
+            .card-container {{ width: 100px; display: flex; justify-content: center; perspective: 1000px; }}
+            .player-card {{ width: 100%; max-width: 85px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.1s linear; }}
+            .player-card-inner {{
+                position: relative; width: 100%;
+                background: linear-gradient(160deg, rgba(248, 250, 252, 0.85), rgba(238, 242, 247, 0.75));
+                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                overflow: hidden; display: flex; flex-direction: column;
+                border: 1px solid rgba(255, 255, 255, 0.5);
+                transform: translateZ(0); transition: box-shadow 0.3s ease;
+                padding-bottom: 3px;
+            }}
+            .player-card:hover .player-card-inner {{ transform: scale(1.05); }}
+            .card-header, .player-image-small, .card-body, .health-bar {{ z-index: 1; }}
+            .card-header {{ display: flex; justify-content: space-between; align-items: center; padding: 3px 4px; font-size: 9px; font-weight: 700; }}
+            .pos-pill {{ background: rgba(0,0,0,0.05); padding: 1px 4px; border-radius: 4px; }}
+            .prob-pill {{ padding: 1px 4px; border-radius: 4px; }}
+            .player-image-small {{ height: 50px; width: 100%; overflow: hidden; }}
+            .player-image-small img {{ width: 100%; height: 100%; object-fit: cover; object-position: top; }}
+            .card-body {{ text-align: center; padding: 2px 2px 6px 2px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }}
+            .p-name {{ font-size: clamp(10px, 2.5vw, 12px); font-weight: 800; color: #1e293b; line-height: 1.1; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+            .p-team {{ font-size: 8px; color: #64748b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+            .health-bar {{ position: absolute; bottom: 0; left: 0; height: 3px; }}
+
+            .bench-title {{ width: 100%; text-align: center; margin: 0 0 15px 0; font-size: 16px; font-weight: 800; color: #555; text-transform: uppercase; letter-spacing: 0.5px; }}
+            .bench-title span {{ background: rgba(0,0,0,0.03); padding: 6px 15px; border-radius: 20px; }}
+            .bench-container {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 10px; width: 100%; max-width: 900px; }}
+
+            .modal-overlay, .modal-card, .modal-close, #modal-player-image, #modal-player-name, #modal-player-team, .modal-stats, .stat, .stat-value, .stat-label, .modal-footer-link {{
+                /* Re-use all modal styles from above */
+            }}
+            .modal-overlay {{ position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }}
+            .modal-overlay.visible {{ opacity: 1; visibility: visible; }}
+            .modal-card {{ width: 90%; max-width: 340px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 20px; color: #333; transform: scale(0.95); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; position: relative; }}
+            .modal-overlay.visible .modal-card {{ transform: scale(1); opacity: 1; }}
+            .modal-close {{ position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); color: #333; border: none; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; z-index: 1010; }}
+            #modal-player-image {{ width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 10px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }}
+            #modal-player-image img {{ width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }}
+            #modal-player-name {{ font-size: 28px; font-weight: 800; margin: 8px 0; line-height: 1.1; color: #1a202c; text-align: center; }}
+            #modal-player-team {{ font-size: 16px; color: #4a5568; text-align: center;}}
+            .modal-stats {{ display: flex; justify-content: space-around; margin-top: 15px;}}
+            .stat {{ text-align: center; }}
+            .stat-value {{ font-size: 24px; font-weight: 800; color: #2d3748; }}
+            .stat-label {{ font-size: 12px; color: #718096; }}
+            .modal-footer-link {{ display: block; text-align: center; color: #4299e1; text-decoration: none; margin-top: 20px; font-weight: 600; }}
+
+            @media (prefers-color-scheme: dark) {{
+                .bench-title {{ color: #e5e7eb; }}
+                .bench-title span {{ background: #262730; }}
+                .player-card-inner {{ background: linear-gradient(160deg, rgba(55, 65, 81, 0.85), rgba(31, 41, 55, 0.75)); border: 1px solid rgba(255, 255, 255, 0.2); }}
+                .p-name {{ color: #f3f4f6; }} .p-team {{ color: #9ca3af; }}
+                .pos-pill {{ background: rgba(255,255,255,0.08); }}
+                .modal-card {{ background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); }}
+                #modal-player-name, #modal-player-team, .stat-value, .modal-close {{ color: #e5e7eb; }}
+                .stat-label {{ color: #9ca3af; }}
+            }}
+             @media (min-width: 768px) {{
+                .card-container {{ width: 120px; }}
+                .player-card {{ max-width: 120px; }}
+            }}
+        </style>
+    </head>
+    <body>
+        {grid_html}
+        <div id="player-modal" class="modal-overlay">
+            <div class="modal-card">
+                <button class="modal-close">&times;</button>
+                <div id="modal-player-image"><img src="" alt="Foto del jugador"></div>
+                <h2 id="modal-player-name">Nombre Jugador</h2>
+                <p id="modal-player-team">Equipo</p>
+                <div class="modal-stats">
+                    <div class="stat">
+                        <div id="modal-pos" class="stat-value"></div>
+                        <div class="stat-label">Posición</div>
+                    </div>
+                    <div class="stat">
+                        <div id="modal-prob" class="stat-value"></div>
+                        <div class="stat-label">Prob. XI</div>
+                    </div>
+                </div>
+                <a id="modal-profile-link" href="#" target="_blank" class="modal-footer-link">Ver perfil completo</a>
+            </div>
+        </div>
+        <script>
+            // El script para el modal es autocontenido y se puede copiar directamente.
+            document.addEventListener('DOMContentLoaded', function () {{
+                const modal = document.getElementById('player-modal');
+                if (!modal) return;
+                const modalClose = modal.querySelector('.modal-close');
+                const playerCards = document.querySelectorAll('.player-card');
+
+                function showModal(data) {{
+                    document.getElementById('modal-prob').innerText = data.probabilidad + '%';
+                    document.getElementById('modal-pos').innerText = data.posicion;
+                    document.getElementById('modal-player-name').innerText = data.nombre;
+                    document.getElementById('modal-player-team').innerText = data.equipo;
+                    document.getElementById('modal-player-image').querySelector('img').src = data.imagenUrl;
+                    document.getElementById('modal-profile-link').href = data.perfilUrl;
+                    modal.classList.add('visible');
+                }}
+
+                function hideModal() {{ modal.classList.remove('visible'); }}
+
+                playerCards.forEach(card => {{
+                    card.addEventListener('click', function() {{ showModal(this.dataset); }});
+                }});
+
+                modalClose.addEventListener('click', hideModal);
+                modal.addEventListener('click', e => {{ if (e.target === modal) hideModal(); }});
+            }});
+        </script>
+    </body>
+    </html>
+    """
+    return full_html
