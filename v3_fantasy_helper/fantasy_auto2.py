@@ -76,22 +76,16 @@ st.markdown("""
     }
 
     /* Botón Destructivo (Borrar plantilla) */
-    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button {
+    .stButton[aria-label="🗑️ Eliminar todos los jugadores"]>button {
         color: white;
-        background-color: #EF4444; /* Rojo fuerte para acción destructiva */
-        border: 1px solid #EF4444;
-        font-weight: bold;
+        background-color: #D32F2F;
+        border-color: #D32F2F;
     }
-    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button:hover {
-        background-color: #DC2626; /* Rojo más oscuro al pasar el ratón */
-        border: 1px solid #DC2626;
+    .stButton[aria-label="🗑️ Eliminar todos los jugadores"]>button:hover {
+        background-color: #C62828;
+        border-color: #C62828;
     }
-    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button:disabled {
-        background-color: #374151;
-        color: #6B7280;
-        border: none;
-    }
-    
+
     /* Formulario Añadir Jugador */
     form[data-testid="stForm"] button {
         background-color: #166534;
@@ -230,21 +224,45 @@ with tab1:
 
     # Método 1: Uno a uno con la nueva UI profesional
     with input_method_tab1:
-        st.caption("Añade jugadores a tu lista. Los cambios no se guardan hasta que pulses 'Guardar cambios'.")
+        st.caption("Añade jugadores a tu lista. Los cambios se guardan automáticamente.")
 
-        # Cargar plantilla desde localStorage solo si no está en session_state
+        # --- GESTIÓN DE ESTADO Y AUTOGUARDADO ---
+
+        # 1. Cargar la plantilla desde localStorage si no está en el estado de la sesión.
         if "plantilla_bloques" not in st.session_state:
             plantilla_guardada_str = localS.getItem("fantasy_plantilla")
             st.session_state.plantilla_bloques = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
             
-            # Ordenar también la plantilla inicial cargada desde el almacenamiento
+            # Ordenar la plantilla inicial
             pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
             st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
 
             if plantilla_guardada_str:
                 st.toast("¡Hemos cargado tu plantilla guardada!", icon="👍")
+        
+        # Inicializar el estado de 'previous_plantilla' para el seguimiento de cambios
+        if "previous_plantilla" not in st.session_state:
+            st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
 
-        # Inputs para añadir nuevo jugador
+        # 2. Comprobar si hay cambios y autoguardar
+        current_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in st.session_state.plantilla_bloques], key=lambda x: x['Nombre'])
+        previous_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in st.session_state.previous_plantilla], key=lambda x: x['Nombre'])
+
+        if current_norm != previous_norm:
+            with st.spinner("Guardando..."):
+                localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
+                st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
+                st.toast("Cambios guardados automáticamente!", icon="💾")
+                time.sleep(0.5) # Pequeña pausa para que el usuario perciba el guardado
+                st.rerun()
+
+        # 3. Manejar acciones desde la URL (para el botón personalizado)
+        if st.query_params.get("action") == "confirm_delete":
+            st.session_state.show_confirm_dialog = True
+            st.query_params.clear()
+            st.rerun()
+
+        # --- FORMULARIO PARA AÑADIR JUGADOR ---
         with st.form(key="add_player_form", clear_on_submit=True):
             c1, c2, c3 = st.columns([0.6, 0.3, 0.1])
             nombre_placeholder = "Selecciona un jugador..."
@@ -261,37 +279,13 @@ with tab1:
                     nuevo_jugador = {"id": int(time.time() * 1000), "Nombre": nuevo_nombre, "Posicion": nueva_pos}
                     st.session_state.plantilla_bloques.append(nuevo_jugador)
                     
-                    # Ordenar la plantilla por posición
                     pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
                     st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
-                    
                     st.rerun()
         
-        # Lógica de guardado y borrado de plantilla
-        plantilla_guardada_str = localS.getItem("fantasy_plantilla")
-        plantilla_guardada = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
-        
-        plantilla_actual_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in st.session_state.plantilla_bloques], key=lambda x: x['Nombre'])
-        plantilla_guardada_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in plantilla_guardada], key=lambda x: x['Nombre'])
-        hay_cambios = plantilla_actual_norm != plantilla_guardada_norm
-
-        c1, c2, c3 = st.columns([0.4, 0.4, 0.2])
-        if c1.button("💾 Guardar cambios", type="primary", disabled=not hay_cambios):
-            localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
-            st.success("¡Plantilla guardada con éxito!")
-            time.sleep(1)
-            st.rerun()
-
-        if c2.button("🗑️ Borrar plantilla guardada", type="primary"):
-            localS.eraseItem("fantasy_plantilla")
-            st.session_state.plantilla_bloques = []
-            st.rerun()
-        
-        with c3:
-            if hay_cambios:
-                st.warning("Sin guardar", icon="⚠️")
-            elif plantilla_guardada:
-                st.success("Sincronizado", icon="✅")
+        # Mensaje de estado de autoguardado nativo de Streamlit
+        if st.session_state.plantilla_bloques:
+            st.success("✅ Plantilla guardada automáticamente")
 
         st.divider()
 
@@ -313,14 +307,77 @@ with tab1:
                     
                     # Botón de eliminar (columna 2)
                     if col2.button("Eliminar jugador", key=f"del_{bloque['id']}", help=f"Quitar a {bloque['Nombre']}"):
-                        st.session_state.plantilla_bloques.pop(i)
+                        st.session_state.show_confirm_delete_player = True
+                        st.session_state.player_to_delete_id = bloque['id']
                         st.rerun()
 
             df_plantilla = pd.DataFrame(st.session_state.plantilla_bloques)
             if not df_plantilla.empty:
                 df_plantilla = df_plantilla.drop(columns=['id']).drop_duplicates(subset=["Nombre"])
+
+            # --- Acción de Limpieza ---
+            st.divider()
+            c1, c2, c3 = st.columns([0.6, 0.4, 0.1]) # Columnas para centrar el botón
+            with c2:
+                if st.button("🗑️ Eliminar todos los jugadores", help="Quitar todos los jugadores de la plantilla", type="primary", use_container_width=True):
+                    st.session_state.show_confirm_dialog = True
         else:
             st.info("Añade tu primer jugador usando el formulario de arriba.")
+
+        # Lógica del diálogo de confirmación para eliminar todos los jugadores
+        if "show_confirm_dialog" not in st.session_state:
+            st.session_state.show_confirm_dialog = False
+
+        if st.session_state.show_confirm_dialog:
+            @st.dialog("Confirmar eliminación total")
+            def confirm_delete_all():
+                st.warning("¿Estás seguro de que quieres eliminar todos los jugadores de tu plantilla? Esta acción no se puede deshacer.", icon="⚠️")
+                
+                d_c1, d_c2 = st.columns(2)
+                if d_c1.button("Sí, eliminar plantilla", type="primary"):
+                    st.session_state.plantilla_bloques = []
+                    st.session_state.show_confirm_dialog = False
+                    st.rerun()
+
+                if d_c2.button("Cancelar"):
+                    st.session_state.show_confirm_dialog = False
+                    st.rerun()
+            
+            confirm_delete_all()
+
+        # Lógica del diálogo de confirmación para eliminar un jugador individual
+        if "show_confirm_delete_player" not in st.session_state:
+            st.session_state.show_confirm_delete_player = False
+
+        if st.session_state.show_confirm_delete_player:
+            player_id_to_delete = st.session_state.get("player_to_delete_id")
+            player_to_delete = next((p for p in st.session_state.plantilla_bloques if p.get('id') == player_id_to_delete), None)
+
+            @st.dialog("Confirmar eliminación")
+            def confirm_player_delete():
+                if player_to_delete:
+                    st.warning(f"¿Estás seguro de que quieres eliminar a **{player_to_delete['Nombre']}** de tu plantilla?", icon="⚠️")
+                else:
+                    st.warning("¿Estás seguro de que quieres eliminar este jugador?", icon="⚠️")
+
+                d_c1, d_c2 = st.columns(2)
+                if d_c1.button("Sí, eliminar", type="primary"):
+                    st.session_state.plantilla_bloques = [p for p in st.session_state.plantilla_bloques if p.get('id') != player_id_to_delete]
+                    st.session_state.show_confirm_delete_player = False
+                    del st.session_state.player_to_delete_id
+                    st.rerun()
+
+                if d_c2.button("Cancelar"):
+                    st.session_state.show_confirm_delete_player = False
+                    del st.session_state.player_to_delete_id
+                    st.rerun()
+            
+            if player_to_delete:
+                confirm_player_delete()
+            else: # Failsafe por si el estado se vuelve inconsistente
+                st.session_state.show_confirm_delete_player = False
+                if "player_to_delete_id" in st.session_state:
+                    del st.session_state.player_to_delete_id
         
         # CSS para 'theming' de los widgets de Streamlit
         st.markdown("""
