@@ -77,9 +77,19 @@ st.markdown("""
 
     /* Botón Destructivo (Borrar plantilla) */
     .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button {
-        background: none;
-        border: 1px solid #991B1B;
-        color: #F87171;
+        color: white;
+        background-color: #EF4444; /* Rojo fuerte para acción destructiva */
+        border: 1px solid #EF4444;
+        font-weight: bold;
+    }
+    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button:hover {
+        background-color: #DC2626; /* Rojo más oscuro al pasar el ratón */
+        border: 1px solid #DC2626;
+    }
+    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button:disabled {
+        background-color: #374151;
+        color: #6B7280;
+        border: none;
     }
     
     /* Formulario Añadir Jugador */
@@ -272,8 +282,8 @@ with tab1:
             time.sleep(1)
             st.rerun()
 
-        if c2.button("🗑️ Borrar plantilla guardada"):
-            localS.removeItem("fantasy_plantilla")
+        if c2.button("🗑️ Borrar plantilla guardada", type="primary"):
+            localS.eraseItem("fantasy_plantilla")
             st.session_state.plantilla_bloques = []
             st.rerun()
         
