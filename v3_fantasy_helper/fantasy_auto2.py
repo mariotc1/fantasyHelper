@@ -300,7 +300,7 @@ with tab1:
             # Contenedor para aplicar estilos a las filas generadas por Streamlit
             with st.container():
                 for i, bloque in enumerate(st.session_state.plantilla_bloques):
-                    col1, col2 = st.columns([0.9, 0.1])
+                    col1, col2 = st.columns([0.8, 0.2])
                     pos_class = f"pos-{bloque['Posicion'].lower()}"
                     
                     # Contenido del jugador (columna 1)
@@ -312,8 +312,7 @@ with tab1:
                     """, unsafe_allow_html=True)
                     
                     # Botón de eliminar (columna 2)
-                    col2.button("➖", key=f"del_{bloque['id']}", help=f"Quitar a {bloque['Nombre']}")
-                    if st.session_state[f"del_{bloque['id']}"]:
+                    if col2.button("Eliminar jugador", key=f"del_{bloque['id']}", help=f"Quitar a {bloque['Nombre']}"):
                         st.session_state.plantilla_bloques.pop(i)
                         st.rerun()
 
@@ -333,25 +332,27 @@ with tab1:
                 padding: 8px;
             }
             
+            /* --- FORZAR FILA EN MÓVIL --- */
             /* Contenedor de CADA FILA de jugador (st.columns) */
-            /* Este selector es ahora más específico para apuntar solo a las filas de la lista */
             div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"] {
+                flex-direction: row !important; /* Evita que las columnas se apilen en móvil */
                 align-items: center;
                 border-bottom: 1px solid #374151;
                 transition: background-color 0.2s ease-in-out;
             }
             div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:hover {
-                background-color: #1F2937; /* El ÚNICO efecto hover */
+                background-color: #1F2937;
             }
             div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:last-child {
                 border-bottom: none;
             }
 
+            /* Contenedor del nombre y posición del jugador */
             .player-row-st {
                 display: flex;
-                flex-direction: column; /* Mobile first: una cosa encima de la otra */
-                align-items: flex-start;
-                gap: 4px;
+                flex-direction: row;
+                align-items: center;
+                gap: 16px;
                 padding: 8px 0;
             }
             .player-name-st { font-size: 1rem; font-weight: 700; color: #F9FAFB; }
@@ -365,22 +366,23 @@ with tab1:
 
             /* Botón de eliminar (dentro de la fila del jugador) */
             div[data-testid="stButton"] > button[kind="secondary"] {
-                background: none !important; border: none !important;
-                opacity: 0.4; transition: opacity 0.2s, transform 0.2s;
-                color: #9CA3AF !important;
+                background-color: rgba(239, 68, 68, 0.1) !important;
+                color: #F87171 !important;
+                border: none !important;
+                padding: 2px 8px !important; /* Reducir padding para bajar altura */
+                border-radius: 12px !important;
+                font-size: 0.75rem !important;
+                font-weight: 500 !important;
+                line-height: 1.4 !important; /* Ajustar para centrado vertical */
+                height: auto !important;
+                transition: background-color 0.2s, transform 0.2s;
             }
-            /* El botón se muestra al hacer hover en la fila (selector específico) */
-            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:hover div[data-testid="stButton"] > button[kind="secondary"] {
-                opacity: 1;
+            div[data-testid="stButton"] > button[kind="secondary"]:hover {
+                background-color: rgba(239, 68, 68, 0.2) !important;
+                transform: scale(1.05);
             }
-
-            /* --- VISTA DESKTOP --- */
-            @media (min-width: 768px) {
-                .player-row-st {
-                    flex-direction: row; /* En desktop, en la misma línea */
-                    align-items: center;
-                    gap: 16px;
-                }
+            div[data-testid="stButton"] > button[kind="secondary"]:active {
+                transform: scale(0.98);
             }
         </style>
         """, unsafe_allow_html=True)
