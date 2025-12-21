@@ -14,7 +14,7 @@ from src.data_utils import parsear_plantilla_pegada, df_desde_csv_subido
 
 from src.core import emparejar_con_datos, seleccionar_mejor_xi, buscar_nombre_mas_cercano
 
-from src.output_generators import generar_pdf_xi, generar_html_alineacion_completa, generar_html_grid_jugadores
+from src.output_generators import generar_pdf_xi, generar_html_alineacion_completa
 
 
 
@@ -54,60 +54,59 @@ st.markdown("""
 
 <style>
 
+    /* === BOTONES GLOBALES Y ESTÉTICA === */
     .stButton>button {
-
-        border-radius: 20px; border: 1px solid #4F8BF9; color: #4F8BF9;
-
+        border-radius: 20px;
         transition: all 0.2s ease-in-out;
-
+    }
+    
+    /* Botón Primario (Calcular XI, Guardar Cambios) */
+    .stButton[aria-label="Calcular mi XI ideal"]>button,
+    .stButton[aria-label="💾 Guardar cambios"]>button {
+        color: white;
+        background-color: #4F8BF9;
+        border: 1px solid #4F8BF9;
+        font-weight: bold;
+    }
+    
+    .stButton[aria-label="💾 Guardar cambios"]>button:disabled {
+        background-color: #374151;
+        color: #6B7280;
+        border: none;
     }
 
-    .stButton>button:hover {
-
-        border: 1px solid #0B5ED7; color: #0B5ED7; transform: scale(1.02);
-
+    /* Botón Destructivo (Borrar plantilla) */
+    .stButton[aria-label="🗑️ Borrar plantilla guardada"]>button {
+        background: none;
+        border: 1px solid #991B1B;
+        color: #F87171;
+    }
+    
+    /* Formulario Añadir Jugador */
+    form[data-testid="stForm"] button {
+        background-color: #166534;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
     }
 
-    .stButton[aria-label="Calcular mi XI ideal"]>button {
-
-        color: white; background-color: #4F8BF9; border-radius: 20px; border: none;
-
-        font-weight: bold; font-size: 1.1em; transition: all 0.3s ease-in-out;
-
-    }
-
-    .stButton[aria-label="Calcular mi XI ideal"]>button:hover {
-
-        background-color: #0B5ED7; color: white; transform: scale(1.02);
-
-        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-
-    }
-
+    /* === OTROS ESTILOS === */
     div[data-testid="metric-container"] {
-
-        background-color: rgba(230, 240, 255, 0.5); border-radius: 10px; padding: 15px;
-
+        background-color: rgba(230, 240, 255, 0.5);
+        border-radius: 10px; padding: 15px;
     }
-
     .footer {
-
         position: fixed; left: 0; bottom: 0; width: 100%;
-
         background-color: #ffffff; text-align: center; padding: 8px;
-
         z-index: 9999; border-top: 1px solid #e0e0e0;
-
     }
-
     @media (prefers-color-scheme: dark) {
-
         .footer { background-color: #0e1117; border-top: 1px solid #262730; }
-
         div[data-testid="metric-container"] { background-color: rgba(38, 39, 48, 0.8); }
-
     }
-
 </style>
 
 """, unsafe_allow_html=True)
@@ -117,9 +116,7 @@ st.markdown("""
 # --- INICIALIZACIÓN ---
 
 localS = LocalStorage()
-
 st.title("Fantasy XI Assistant")
-
 st.caption("Calcula tu alineación ideal con datos de probabilidad en tiempo real")
 
 
@@ -127,13 +124,11 @@ st.caption("Calcula tu alineación ideal con datos de probabilidad en tiempo rea
 # Carga de datos principales
 
 df_laliga = scrape_laliga()
-
 if df_laliga.empty:
 
     st.error("🔴 No se pudieron cargar los datos de los jugadores de LaLiga. La aplicación no puede continuar.")
 
     st.stop()
-
 nombres_laliga = sorted(df_laliga["Nombre"].unique())
 
 
@@ -141,7 +136,6 @@ nombres_laliga = sorted(df_laliga["Nombre"].unique())
 
 
 # --- BARRA LATERAL (SIDEBAR) ---
-
 with st.sidebar:
 
     st.image("https://play-lh.googleusercontent.com/xx7OVI90d-d6pvQlqmAAeUo4SzvLsrp9uss8XPO1ZwILEeTCpjYFVRuL550bUqlicy0=w240-h480-rw", width=80)
@@ -207,9 +201,7 @@ with st.sidebar:
 
 
 # --- PESTAÑAS PRINCIPALES ---
-
 tab1, tab2 = st.tabs(["1️⃣ Introduce tu Plantilla", "2️⃣ Tu XI Ideal y Banquillo"])
-
 df_plantilla = pd.DataFrame()
 
 
@@ -226,114 +218,162 @@ with tab1:
 
 
 
-    # Método 1: Uno a uno
-
+    # Método 1: Uno a uno con la nueva UI profesional
     with input_method_tab1:
+        st.caption("Añade jugadores a tu lista. Los cambios no se guardan hasta que pulses 'Guardar cambios'.")
 
-        st.caption("Añade o elimina jugadores. Tus cambios se guardarán en el navegador para la próxima visita")
-
-
-
+        # Cargar plantilla desde localStorage solo si no está en session_state
         if "plantilla_bloques" not in st.session_state:
-
             plantilla_guardada_str = localS.getItem("fantasy_plantilla")
+            st.session_state.plantilla_bloques = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
+            
+            # Ordenar también la plantilla inicial cargada desde el almacenamiento
+            pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
+            st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
 
-            st.session_state.plantilla_bloques = json.loads(plantilla_guardada_str) if plantilla_guardada_str else [{"id": i, "Nombre": "", "Posicion": ""} for i in range(11)]
+            if plantilla_guardada_str:
+                st.toast("¡Hemos cargado tu plantilla guardada!", icon="👍")
 
-            if plantilla_guardada_str: st.toast("¡Hemos cargado tu plantilla guardada!", icon="👍")
+        # Inputs para añadir nuevo jugador
+        with st.form(key="add_player_form", clear_on_submit=True):
+            c1, c2, c3 = st.columns([0.6, 0.3, 0.1])
+            nombre_placeholder = "Selecciona un jugador..."
+            pos_placeholder = "Posición"
+            nuevo_nombre = c1.selectbox("Nombre", [nombre_placeholder] + nombres_laliga, label_visibility="collapsed")
+            nueva_pos = c2.selectbox("Pos", [pos_placeholder, "POR", "DEF", "CEN", "DEL"], label_visibility="collapsed")
+            
+            submitted = c3.form_submit_button("➕", help="Añadir jugador a la lista")
 
-
-
-        POS_OPTIONS = ["Elige una posición...", "POR", "DEF", "CEN", "DEL"]
-
-        NAME_OPTIONS = ["Selecciona un jugador..."] + nombres_laliga
-
-        
-
-        for i, bloque in enumerate(st.session_state.plantilla_bloques):
-
-            with st.container(border=True):
-
-                c1, c2 = st.columns([0.85, 0.15])
-
-                idx_nombre = NAME_OPTIONS.index(bloque["Nombre"]) if bloque["Nombre"] in NAME_OPTIONS else 0
-
-                idx_pos = POS_OPTIONS.index(bloque["Posicion"]) if bloque["Posicion"] in POS_OPTIONS else 0
-
-                
-
-                c1.selectbox(f"Nombre_{i}", NAME_OPTIONS, index=idx_nombre, key=f"nombre_{bloque['id']}", label_visibility="collapsed")
-
-                c1.selectbox(f"Pos_{i}", POS_OPTIONS, index=idx_pos, key=f"pos_{bloque['id']}", label_visibility="collapsed")
-
-                
-
-                if c2.button("❌", key=f"del_{bloque['id']}", help="Quitar este jugador"):
-
-                    st.session_state.plantilla_bloques.pop(i)
-
+            if submitted and nuevo_nombre != nombre_placeholder and nueva_pos != pos_placeholder:
+                if any(p['Nombre'] == nuevo_nombre for p in st.session_state.plantilla_bloques):
+                    st.toast(f"{nuevo_nombre} ya está en tu plantilla.", icon="⚠️")
+                else:
+                    nuevo_jugador = {"id": int(time.time() * 1000), "Nombre": nuevo_nombre, "Posicion": nueva_pos}
+                    st.session_state.plantilla_bloques.append(nuevo_jugador)
+                    
+                    # Ordenar la plantilla por posición
+                    pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
+                    st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
+                    
                     st.rerun()
+        
+        # Lógica de guardado y borrado de plantilla
+        plantilla_guardada_str = localS.getItem("fantasy_plantilla")
+        plantilla_guardada = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
+        
+        plantilla_actual_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in st.session_state.plantilla_bloques], key=lambda x: x['Nombre'])
+        plantilla_guardada_norm = sorted([{'Nombre': p['Nombre'], 'Posicion': p['Posicion']} for p in plantilla_guardada], key=lambda x: x['Nombre'])
+        hay_cambios = plantilla_actual_norm != plantilla_guardada_norm
 
-
-
-        if st.button("➕ Añadir jugador"):
-
-            st.session_state.plantilla_bloques.append({"id": int(time.time() * 1000), "Nombre": "", "Posicion": ""})
-
+        c1, c2, c3 = st.columns([0.4, 0.4, 0.2])
+        if c1.button("💾 Guardar cambios", type="primary", disabled=not hay_cambios):
+            localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
+            st.success("¡Plantilla guardada con éxito!")
+            time.sleep(1)
             st.rerun()
 
-
+        if c2.button("🗑️ Borrar plantilla guardada"):
+            localS.removeItem("fantasy_plantilla")
+            st.session_state.plantilla_bloques = []
+            st.rerun()
+        
+        with c3:
+            if hay_cambios:
+                st.warning("Sin guardar", icon="⚠️")
+            elif plantilla_guardada:
+                st.success("Sincronizado", icon="✅")
 
         st.divider()
 
+        # Mostrar la lista de jugadores con el nuevo componente
+        if st.session_state.plantilla_bloques:
+            # Contenedor para aplicar estilos a las filas generadas por Streamlit
+            with st.container():
+                for i, bloque in enumerate(st.session_state.plantilla_bloques):
+                    col1, col2 = st.columns([0.9, 0.1])
+                    pos_class = f"pos-{bloque['Posicion'].lower()}"
+                    
+                    # Contenido del jugador (columna 1)
+                    col1.markdown(f"""
+                    <div class="player-row-st">
+                        <span class="player-name-st">{bloque['Nombre']}</span>
+                        <span class="position-chip-st {pos_class}">{bloque['Posicion']}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+                    
+                    # Botón de eliminar (columna 2)
+                    col2.button("➖", key=f"del_{bloque['id']}", help=f"Quitar a {bloque['Nombre']}")
+                    if st.session_state[f"del_{bloque['id']}"]:
+                        st.session_state.plantilla_bloques.pop(i)
+                        st.rerun()
 
-
-        plantilla_actual = [{"id": b['id'], "Nombre": st.session_state[f"nombre_{b['id']}"], "Posicion": st.session_state[f"pos_{b['id']}"]} for b in st.session_state.plantilla_bloques]
-
-        plantilla_actual_filtrada = [b for b in plantilla_actual if b.get("Nombre", "Selecciona...") != "Selecciona un jugador..." and b.get("Posicion", "Elige...") != "Elige una posición..."]
-
+            df_plantilla = pd.DataFrame(st.session_state.plantilla_bloques)
+            if not df_plantilla.empty:
+                df_plantilla = df_plantilla.drop(columns=['id']).drop_duplicates(subset=["Nombre"])
+        else:
+            st.info("Añade tu primer jugador usando el formulario de arriba.")
         
+        # CSS para 'theming' de los widgets de Streamlit
+        st.markdown("""
+        <style>
+            /* Contenedor principal de la lista de jugadores */
+            div[data-testid="stVerticalBlock"] > div.st-emotion-cache-1jicfl2 {
+                background-color: #111827;
+                border-radius: 8px;
+                padding: 8px;
+            }
+            
+            /* Contenedor de CADA FILA de jugador (st.columns) */
+            /* Este selector es ahora más específico para apuntar solo a las filas de la lista */
+            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"] {
+                align-items: center;
+                border-bottom: 1px solid #374151;
+                transition: background-color 0.2s ease-in-out;
+            }
+            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:hover {
+                background-color: #1F2937; /* El ÚNICO efecto hover */
+            }
+            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:last-child {
+                border-bottom: none;
+            }
 
-        plantilla_guardada_str = localS.getItem("fantasy_plantilla")
+            .player-row-st {
+                display: flex;
+                flex-direction: column; /* Mobile first: una cosa encima de la otra */
+                align-items: flex-start;
+                gap: 4px;
+                padding: 8px 0;
+            }
+            .player-name-st { font-size: 1rem; font-weight: 700; color: #F9FAFB; }
+            .position-chip-st {
+                font-size: 0.75rem; font-weight: 500; padding: 2px 8px; border-radius: 12px;
+            }
+            .pos-por { background-color: rgba(234, 179, 8, 0.1); color: #FBBF24; }
+            .pos-def { background-color: rgba(59, 130, 246, 0.1); color: #60A5FA; }
+            .pos-cen { background-color: rgba(16, 185, 129, 0.1); color: #34D399; }
+            .pos-del { background-color: rgba(239, 68, 68, 0.1); color: #F87171; }
 
-        plantilla_guardada = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
+            /* Botón de eliminar (dentro de la fila del jugador) */
+            div[data-testid="stButton"] > button[kind="secondary"] {
+                background: none !important; border: none !important;
+                opacity: 0.4; transition: opacity 0.2s, transform 0.2s;
+                color: #9CA3AF !important;
+            }
+            /* El botón se muestra al hacer hover en la fila (selector específico) */
+            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:hover div[data-testid="stButton"] > button[kind="secondary"] {
+                opacity: 1;
+            }
 
-        hay_cambios = plantilla_actual_filtrada != plantilla_guardada
-
-
-
-        c1, c2 = st.columns(2)
-
-        if c1.button("💾 Guardar cambios", type="primary", disabled=not hay_cambios):
-
-            localS.setItem("fantasy_plantilla", json.dumps(plantilla_actual_filtrada))
-
-            st.success("¡Plantilla guardada con éxito!"); time.sleep(1); st.rerun()
-
-
-
-        if c2.button("🗑️ Borrar plantilla guardada"):
-
-            localS.setItem("fantasy_plantilla", None)
-
-            st.session_state.plantilla_bloques = [{"id": i, "Nombre": "", "Posicion": ""} for i in range(11)]
-
-            st.info("Plantilla guardada eliminada."); st.rerun()
-
-        
-
-        if hay_cambios: st.warning("Tienes cambios sin guardar", icon="⚠️")
-
-        elif plantilla_guardada: st.success("Plantilla sincronizada", icon="✅")
-
-        
-
-        df_plantilla_manual = pd.DataFrame(plantilla_actual_filtrada)
-
-        if not df_plantilla_manual.empty:
-
-            df_plantilla = df_plantilla_manual.drop(columns=['id']).drop_duplicates(subset=["Nombre"])
-
+            /* --- VISTA DESKTOP --- */
+            @media (min-width: 768px) {
+                .player-row-st {
+                    flex-direction: row; /* En desktop, en la misma línea */
+                    align-items: center;
+                    gap: 16px;
+                }
+            }
+        </style>
+        """, unsafe_allow_html=True)
 
 
     # Método 2: Pegar lista
@@ -362,84 +402,40 @@ with tab1:
 
 
 
-    # Muestra la plantilla cargada en el nuevo formato visual
-
-    if not df_plantilla.empty:
-
+    # Procesamiento y visualización común para métodos 2 y 3
+    if not df_plantilla.empty and (input_method_tab2 or input_method_tab3):
         if df_plantilla['Nombre'].duplicated().any():
-
             st.warning("⚠️ Se han detectado y eliminado jugadores duplicados.", icon="❗")
-
             df_plantilla = df_plantilla.drop_duplicates(subset=['Nombre'], keep='first')
 
-
-
         st.success(f"✅ Plantilla cargada con **{len(df_plantilla)}** jugadores. Comprueba las coincidencias a continuación:")
-
         
-
-        # Emparejar jugadores con datos de LaLiga para obtener datos enriquecidos
-
+        # Emparejar jugadores con datos de LaLiga
         df_encontrados, no_encontrados = emparejar_con_datos(df_plantilla, df_laliga, cutoff)
 
-
-
         if not df_encontrados.empty:
-
-            # Generar y mostrar el grid de jugadores
-
-            html_grid = generar_html_grid_jugadores(df_encontrados, "Jugadores Encontrados")
-
-            # Calcular altura dinámicamente para el componente HTML
-
-            num_jugadores = len(df_encontrados)
-
-            filas = -(-num_jugadores // 5) if num_jugadores > 0 else 0 # 5 columnas en escritorio
-
-            altura = 100 + (filas * 150) # Altura base + altura por fila
-
-            components.html(html_grid, height=altura, scrolling=True)
-
-
+            st.dataframe(df_encontrados[['Mi_nombre', 'Posicion', 'Equipo', 'Probabilidad']], use_container_width=True)
 
         # Mostrar jugadores no encontrados si los hay
-
         if no_encontrados:
-
             st.warning(f"⚠️ **{len(no_encontrados)} Jugadores no encontrados:** " + ", ".join(sorted(set(no_encontrados))))
-
             sugerencias = [f"Para '{n}', ¿quizás quisiste decir **{sug}**?" for n in no_encontrados if (sug := buscar_nombre_mas_cercano(n, df_laliga['Nombre'], 0.5))]
-
-            if sugerencias:
-
-                st.info("💡 Sugerencias:\n- " + "\n- ".join(sugerencias))
-
-
+            if sugerencias: st.info("💡 Sugerencias:\n- " + "\n- ".join(sugerencias))
 
         # Mensaje si ningún jugador fue encontrado
-
         if df_encontrados.empty and not df_plantilla.empty:
-
             st.error("No se pudo encontrar ningún jugador de tu plantilla. Revisa los nombres o ajusta la 'Sensibilidad de matching' en la barra lateral.")
 
-
-
-        # Comprobación de número de jugadores
-
-        if len(df_plantilla) < 11:
-
-            st.error(f"🚨 Necesitas al menos 11 jugadores para calcular un XI. Tienes {len(df_plantilla)}.", icon="❌")
-
-    else:
-
+    # Comprobación general del número de jugadores para todos los métodos
+    if not df_plantilla.empty and len(df_plantilla) < 11:
+        st.error(f"🚨 Necesitas al menos 11 jugadores para calcular un XI. Tienes {len(df_plantilla)}.", icon="❌")
+    elif df_plantilla.empty and input_method_tab1:
+        pass # No mostrar mensaje de error si la lista manual está vacía
+    elif df_plantilla.empty:
         st.info("Esperando a que introduzcas tu plantilla en una de las pestañas de arriba.")
 
 
-
-
-
-# --- PESTAÑA 2: XI IDEAL Y BANQUILLO ---
-
+# --- PESTAÑAS 2: XI IDEAL Y BANQUILLO ---
 with tab2:
 
     if df_plantilla.empty or len(df_plantilla) < 11:
@@ -552,7 +548,7 @@ with tab2:
 
         components.html(
 
-            generar_html_alineacion_completa(df_xi, banca, pdf_base64, link_twitter, link_whatsapp), 
+            generar_html_alineacion_completa(df_xi, banca, pdf_base64, link_twitter, link_whatsapp),
 
             height=altura_total, 
 
@@ -577,5 +573,4 @@ with tab2:
 
 
 # --- FOOTER ---
-
 st.markdown("<div class='footer'><p style='font-size: 14px; color: gray;'>Tip: Usa el asistente el día antes de la jornada para obtener las mejores probabilidades</p></div>", unsafe_allow_html=True)
