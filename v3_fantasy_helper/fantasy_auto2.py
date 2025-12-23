@@ -599,7 +599,7 @@ with tab1:
 
                             f'<div class="card-container-plantilla">'
 
-                            f'<a href="{delete_href}" class="delete-icon-plantilla" title="Eliminar a {nombre_jugador}">'
+                            f'<a href="{delete_href}" target="_self" class="delete-icon-plantilla" title="Eliminar a {nombre_jugador}">'
 
                             f'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">'
 
