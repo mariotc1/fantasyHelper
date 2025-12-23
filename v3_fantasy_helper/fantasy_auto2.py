@@ -262,6 +262,14 @@ with tab1:
             st.query_params.clear()
             st.rerun()
 
+        if st.query_params.get("action") == "delete_player":
+            player_id_to_delete = st.query_params.get("player_id")
+            if player_id_to_delete:
+                st.session_state.show_confirm_delete_player = True
+                st.session_state.player_to_delete_id = int(player_id_to_delete)
+                st.query_params.clear()
+                st.rerun()
+
         # --- FORMULARIO PARA AÑADIR JUGADOR ---
         with st.form(key="add_player_form", clear_on_submit=True):
             c1, c2, c3 = st.columns([0.6, 0.3, 0.1])
@@ -287,41 +295,380 @@ with tab1:
         if st.session_state.plantilla_bloques:
             st.success("✅ Plantilla guardada automáticamente")
 
-        st.divider()
+            st.divider()
 
-        # Mostrar la lista de jugadores con el nuevo componente
+        
+
+            st.header("Mi plantilla")
+
+        
+
+                # --- INICIO: NUEVA VISUALIZACIÓN DE JUGADORES POR TARJETAS ---
+
+            st.markdown("""
+
+                <style>
+
+                    .card-container-plantilla {
+
+                        position: relative;
+
+                        width: 105px;
+
+                    }
+
+                    .player-card-plantilla {
+
+                        position: relative;
+
+                        width: 100%;
+
+                        background: linear-gradient(160deg, #2d3748, #1f2937);
+
+                        border-radius: 8px;
+
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+
+                        overflow: hidden;
+
+                        display: flex;
+
+                        flex-direction: column;
+
+                        border: 1px solid rgba(255, 255, 255, 0.15);
+
+                        transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+                    }
+
+                    .card-container-plantilla:hover .player-card-plantilla {
+
+                        transform: translateY(-4px);
+
+                        box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+
+                    }
+
+                    .player-card-plantilla .player-image-small {
+
+                        height: 70px;
+
+                        width: 100%;
+
+                        overflow: hidden;
+
+                        background-color: #1a202c;
+
+                    }
+
+                    .player-card-plantilla .player-image-small img {
+
+                        width: 100%; height: 100%; object-fit: cover; object-position: top;
+
+                    }
+
+                    .player-card-plantilla .card-body {
+
+                        text-align: center;
+
+                        padding: 8px 4px;
+
+                        flex-grow: 1;
+
+                    }
+
+                    .player-card-plantilla .p-name {
+
+                        font-size: 11px;
+
+                        font-weight: 700;
+
+                        color: #F9FAFB;
+
+                        line-height: 1.2;
+
+                        white-space: nowrap;
+
+                        overflow: hidden;
+
+                        text-overflow: ellipsis;
+
+                    }
+
+                    .player-card-plantilla .p-team {
+
+                        font-size: 9px;
+
+                        color: #A0AEC0;
+
+                        font-weight: 500;
+
+                        white-space: nowrap;
+
+                        overflow: hidden;
+
+                        text-overflow: ellipsis;
+
+                        margin-top: 2px;
+
+                    }
+
+                    .player-card-plantilla .pos-pill-footer {
+
+                        font-size: 0.7rem;
+
+                        font-weight: 600;
+
+                        padding: 3px 8px;
+
+                        text-align: center;
+
+                        border-bottom-left-radius: 8px;
+
+                        border-bottom-right-radius: 8px;
+
+                        text-transform: uppercase;
+
+                    }
+
+                    .delete-icon-plantilla {
+
+                        position: absolute;
+
+                        top: -6px;
+
+                        right: -6px;
+
+                        width: 24px;
+
+                        height: 24px;
+
+                        background-color: #EF4444;
+
+                        color: white;
+
+                        border-radius: 50%;
+
+                        display: flex;
+
+                        align-items: center;
+
+                        justify-content: center;
+
+                        cursor: pointer;
+
+                        z-index: 10;
+
+                        transition: transform 0.2s ease, background-color 0.2s ease;
+
+                        text-decoration: none;
+
+                        border: 2px solid #1f2937;
+
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+
+                    }
+
+                    .card-container-plantilla:hover .delete-icon-plantilla {
+
+                        transform: scale(1.1);
+
+                    }
+
+                    .delete-icon-plantilla:hover {
+
+                        background-color: #F87171;
+
+                    }
+
+                    .delete-icon-plantilla svg {
+
+                        width: 14px;
+
+                        height: 14px;
+
+                    }
+
+                    /* Responsive */
+
+                    @media (max-width: 640px) {
+
+                        .card-container-plantilla { width: calc(33.33% - 10px); max-width: 100px; }
+
+                        .player-card-plantilla .p-name { font-size: 10px; }
+
+                    }
+
+                </style>
+
+                """, unsafe_allow_html=True)
+
+        
+
         if st.session_state.plantilla_bloques:
-            # Contenedor para aplicar estilos a las filas generadas por Streamlit
-            with st.container():
-                for i, bloque in enumerate(st.session_state.plantilla_bloques):
-                    col1, col2 = st.columns([0.8, 0.2])
-                    pos_class = f"pos-{bloque['Posicion'].lower()}"
+
+            # Asegurar que no hay espacios en blanco y eliminar duplicados de forma agresiva
+
+            df_laliga['Nombre'] = df_laliga['Nombre'].astype(str).str.strip()
+
+            df_laliga = df_laliga.drop_duplicates(subset=['Nombre'], keep='first')
+
+            df_laliga_data = df_laliga.set_index('Nombre').to_dict('index')
+
+            
+
+            # Definir orden y nombres de las posiciones
+
+            pos_order = ["POR", "DEF", "CEN", "DEL"]
+
+            pos_names = {"POR": "Porteros", "DEF": "Defensas", "CEN": "Centrocampistas", "DEL": "Delanteros"}
+
+            pos_colors = {
+
+                "POR": ("rgba(234, 179, 8, 0.15)", "#FBBF24"),
+
+                "DEF": ("rgba(59, 130, 246, 0.15)", "#60A5FA"),
+
+                "CEN": ("rgba(16, 185, 129, 0.15)", "#34D399"),
+
+                "DEL": ("rgba(239, 68, 68, 0.15)", "#F87171"),
+
+            }
+
+
+
+            # Agrupar jugadores por posición
+
+            grouped_players = {pos: [] for pos in pos_order}
+
+            for player in st.session_state.plantilla_bloques:
+
+                pos = player.get("Posicion")
+
+                if pos in grouped_players:
+
+                    grouped_players[pos].append(player)
+
+
+
+            # Renderizar cada sección
+
+            for pos in pos_order:
+
+                players_in_pos = grouped_players[pos]
+
+                if players_in_pos:
+
+                    st.subheader(pos_names[pos])
+
+                    cards_html_list = []
+
+                    for jugador in players_in_pos:
+
+                        nombre_jugador = jugador.get('Nombre', 'N/A')
+
+                        posicion = jugador.get('Posicion', 'N/A')
+
+                        
+
+                        laliga_info = df_laliga_data.get(nombre_jugador, {})
+
+                        imagen_url = laliga_info.get('Imagen_URL', 'https://static.futbolfantasy.com/images/default-black.jpg')
+
+                        equipo = laliga_info.get('Equipo', '')
+
+
+
+                        nombre_display = nombre_jugador
+
+                        if len(nombre_display) > 12:
+
+                            parts = nombre_display.split()
+
+                            nombre_display = f"{parts[0][0]}. {parts[-1]}" if len(parts) > 1 else nombre_display[:11] + "."
+
+
+
+                        delete_href = f"?action=delete_player&player_id={jugador['id']}"
+
+                        bg_color, text_color = pos_colors.get(posicion, ("#374151", "#9CA3AF"))
+
+
+
+                        card_html = (
+
+                            f'<div class="card-container-plantilla">'
+
+                            f'<a href="{delete_href}" class="delete-icon-plantilla" title="Eliminar a {nombre_jugador}">'
+
+                            f'<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">'
+
+                            f'<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
+
+                            f'</svg>'
+
+                            f'</a>'
+
+                            f'<div class="player-card-plantilla">'
+
+                            f'<div class="player-image-small">'
+
+                            f'<img src="{imagen_url}" alt="{nombre_display}" onerror="this.onerror=null;this.src=\'https://static.futbolfantasy.com/images/default-black.jpg\';">'
+
+                            f'</div>'
+
+                            f'<div class="card-body">'
+
+                            f'<div class="p-name">{nombre_display}</div>'
+
+                            f'<div class="p-team">{equipo}</div>'
+
+                            f'</div>'
+
+                            f'<div class="pos-pill-footer" style="background-color: {bg_color}; color: {text_color};">'
+
+                            f'{posicion}'
+
+                            f'</div>'
+
+                            f'</div>'
+
+                            f'</div>'
+
+                        )
+
+                        cards_html_list.append(card_html)
+
                     
-                    # Contenido del jugador (columna 1)
-                    col1.markdown(f"""
-                    <div class="player-row-st">
-                        <span class="player-name-st">{bloque['Nombre']}</span>
-                        <span class="position-chip-st {pos_class}">{bloque['Posicion']}</span>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # Botón de eliminar (columna 2)
-                    if col2.button("Eliminar jugador", key=f"del_{bloque['id']}", help=f"Quitar a {bloque['Nombre']}"):
-                        st.session_state.show_confirm_delete_player = True
-                        st.session_state.player_to_delete_id = bloque['id']
-                        st.rerun()
+
+                    final_html = f'<div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:flex-start; padding: 10px 0;">{" ".join(cards_html_list)}</div>'
+
+                    st.markdown(final_html, unsafe_allow_html=True)
+
+            
 
             df_plantilla = pd.DataFrame(st.session_state.plantilla_bloques)
+
             if not df_plantilla.empty:
+
                 df_plantilla = df_plantilla.drop(columns=['id']).drop_duplicates(subset=["Nombre"])
 
+
+
             # --- Acción de Limpieza ---
+
             st.divider()
-            c1, c2, c3 = st.columns([0.6, 0.4, 0.1]) # Columnas para centrar el botón
+
+            c1, c2, c3 = st.columns([0.6, 0.4, 0.1]) 
+
             with c2:
+
                 if st.button("🗑️ Eliminar todos los jugadores", help="Quitar todos los jugadores de la plantilla", type="primary", use_container_width=True):
+
                     st.session_state.show_confirm_dialog = True
+
         else:
+
             st.info("Añade tu primer jugador usando el formulario de arriba.")
 
         # Lógica del diálogo de confirmación para eliminar todos los jugadores
@@ -379,70 +726,6 @@ with tab1:
                 if "player_to_delete_id" in st.session_state:
                     del st.session_state.player_to_delete_id
         
-        # CSS para 'theming' de los widgets de Streamlit
-        st.markdown("""
-        <style>
-            /* Contenedor principal de la lista de jugadores */
-            div[data-testid="stVerticalBlock"] > div.st-emotion-cache-1jicfl2 {
-                background-color: #111827;
-                border-radius: 8px;
-                padding: 8px;
-            }
-            
-            /* --- FORZAR FILA EN MÓVIL --- */
-            /* Contenedor de CADA FILA de jugador (st.columns) */
-            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"] {
-                flex-direction: row !important; /* Evita que las columnas se apilen en móvil */
-                align-items: center;
-                border-bottom: 1px solid #374151;
-                transition: background-color 0.2s ease-in-out;
-            }
-            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:hover {
-                background-color: #1F2937;
-            }
-            div.st-emotion-cache-1jicfl2 > div[data-testid="stHorizontalBlock"]:last-child {
-                border-bottom: none;
-            }
-
-            /* Contenedor del nombre y posición del jugador */
-            .player-row-st {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                gap: 16px;
-                padding: 8px 0;
-            }
-            .player-name-st { font-size: 1rem; font-weight: 700; color: #F9FAFB; }
-            .position-chip-st {
-                font-size: 0.75rem; font-weight: 500; padding: 2px 8px; border-radius: 12px;
-            }
-            .pos-por { background-color: rgba(234, 179, 8, 0.1); color: #FBBF24; }
-            .pos-def { background-color: rgba(59, 130, 246, 0.1); color: #60A5FA; }
-            .pos-cen { background-color: rgba(16, 185, 129, 0.1); color: #34D399; }
-            .pos-del { background-color: rgba(239, 68, 68, 0.1); color: #F87171; }
-
-            /* Botón de eliminar (dentro de la fila del jugador) */
-            div[data-testid="stButton"] > button[kind="secondary"] {
-                background-color: rgba(239, 68, 68, 0.1) !important;
-                color: #F87171 !important;
-                border: none !important;
-                padding: 2px 8px !important; /* Reducir padding para bajar altura */
-                border-radius: 12px !important;
-                font-size: 0.75rem !important;
-                font-weight: 500 !important;
-                line-height: 1.4 !important; /* Ajustar para centrado vertical */
-                height: auto !important;
-                transition: background-color 0.2s, transform 0.2s;
-            }
-            div[data-testid="stButton"] > button[kind="secondary"]:hover {
-                background-color: rgba(239, 68, 68, 0.2) !important;
-                transform: scale(1.05);
-            }
-            div[data-testid="stButton"] > button[kind="secondary"]:active {
-                transform: scale(0.98);
-            }
-        </style>
-        """, unsafe_allow_html=True)
 
 
     # Método 2: Pegar lista
