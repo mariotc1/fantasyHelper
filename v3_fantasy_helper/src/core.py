@@ -1,16 +1,20 @@
+# LIBRERÍAS EXTERNAS (difflib para comparación de cadenas, pandas para manejo de datos)
 import difflib
 import pandas as pd
 
+# LIBRERÍAS INTERNAS
 from .data_utils import normaliza_pos
 
+# FUNCIONES PRINCIPALES
+
+# Busca el nombre más similar en una Serie de pandas usando difflib
 def buscar_nombre_mas_cercano(nombre, serie_nombres, cutoff=0.6):
-    """Busca el nombre más similar en una Serie de pandas usando difflib."""
     if not isinstance(nombre, str) or serie_nombres.empty: return None
     cand = difflib.get_close_matches(nombre, serie_nombres.tolist(), n=1, cutoff=cutoff)
     return cand[0] if cand else None
 
+# Empareja el DataFrame de la plantilla del usuario con los datos de LaLiga
 def emparejar_con_datos(plantilla_df, datos_df, cutoff=0.6):
-    """Empareja el DataFrame de la plantilla del usuario con los datos de LaLiga."""
     encontrados = []
     no_encontrados = []
     
@@ -41,8 +45,8 @@ def emparejar_con_datos(plantilla_df, datos_df, cutoff=0.6):
             
     return pd.DataFrame(encontrados), no_encontrados
 
+# Selecciona el mejor XI posible basándose en la probabilidad y las restricciones tácticas
 def seleccionar_mejor_xi(df, min_def=3, max_def=5, min_cen=3, max_cen=5, min_del=1, max_del=3, num_por=1, total=11):
-    """Selecciona el mejor XI posible basándose en la probabilidad y las restricciones tácticas."""
     if df.empty: return []
     
     df = df.copy()
