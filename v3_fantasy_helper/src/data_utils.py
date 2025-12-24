@@ -1,15 +1,18 @@
+# IMPORTACIONES DE LIBRERÍAS EXTERNAS (re para expresiones regulares, pandas para manejo de datos)
 import re
 import pandas as pd
 
+# FUNCIONES AUXILIARES
+
+# Convierte un texto de porcentaje (ej: '95%') a un número flotante
 def limpiar_porcentaje(x):
-    """Convierte un texto de porcentaje (ej: '95%') a un número flotante."""
     if pd.isna(x): return None
     m = re.search(r"(\d+(?:[.,]\d+)?)\s*%", str(x))
     if not m: return None
     return float(m.group(1).replace(",", "."))
 
+# Normaliza una posición de jugador a un valor estándar
 def normaliza_pos(p):
-    """Normaliza la abreviatura de una posición de jugador a un valor estándar."""
     if not isinstance(p, str): return None
     p = p.strip().upper()
     if p in ("POR", "GK", "PT"): return "POR"
@@ -18,14 +21,14 @@ def normaliza_pos(p):
     if p in ("DEL", "DC", "FW", "ST"): return "DEL"
     return p
 
+# Parsea un texto multilínea con datos de jugadores y lo convierte en un DataFrame
 def parsear_plantilla_pegada(texto):
-    """Parsea un texto multilínea con datos de jugadores y lo convierte en un DataFrame."""
     filas = []
     for linea in texto.splitlines():
         linea = linea.strip()
         if not linea: continue
 
-        # Expresión regular más flexible
+        # Expresión regular para capturar nombre, posición y precio
         match = re.match(r"^(.*?)(?:[;,]|\s+)\s*(POR|DEF|CEN|DEL|GK|DF|MC|DC|FW)\s*(?:[;,]|\s+)?(.*)$", linea, re.IGNORECASE)
 
         if match:
@@ -49,8 +52,8 @@ def parsear_plantilla_pegada(texto):
     df = df.drop_duplicates(subset=["Nombre"])
     return df
 
+# Lee un archivo CSV o Excel subido y lo convierte en un DataFrame, renombrando columnas comunes
 def df_desde_csv_subido(file):
-    """Lee un archivo CSV o Excel subido y lo convierte en un DataFrame, renombrando columnas comunes."""
     try:
         df = pd.read_csv(file)
     except Exception:
@@ -59,6 +62,7 @@ def df_desde_csv_subido(file):
     
     col_map = {c.lower(): c for c in df.columns}
     rename = {}
+    
     for target in ["Nombre", "Posicion", "Precio"]:
         match = [col_map[k] for k in col_map if k in (target.lower(), f"mi_{target.lower()}")]
         if match: rename[match[0]] = target

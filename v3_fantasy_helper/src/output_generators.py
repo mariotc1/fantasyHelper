@@ -1,8 +1,9 @@
+# LIBRERIAS EXTERNAS (fpdf para generación de PDFs, pandas para manejo de datos)
 from fpdf import FPDF
 import pandas as pd
 
+# Genera un archivo PDF con la alineación del XI ideal
 def generar_pdf_xi(df_xi: pd.DataFrame) -> bytes:
-    """Genera un archivo PDF con la alineación del XI ideal."""
     pdf = FPDF()
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -26,116 +27,116 @@ def generar_pdf_xi(df_xi: pd.DataFrame) -> bytes:
         
     return pdf.output(dest='S').encode('latin1')
 
-def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
-    """
-    Genera una lista HTML profesional y editable para la plantilla de jugadores.
-    """
-    # --- CSS ---
-    css_styles = """
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
-        :root {
-            --bg-dark: #111827;
-            --row-bg: #1F2937;
-            --row-bg-hover: #374151;
-            --text-primary: #F9FAFB;
-            --text-secondary: #9CA3AF;
-            --border-color: #374151;
-            
-            --pos-por-bg: rgba(234, 179, 8, 0.1);
-            --pos-por-text: #FBBF24;
-            --pos-def-bg: rgba(59, 130, 246, 0.1);
-            --pos-def-text: #60A5FA;
-            --pos-cen-bg: rgba(16, 185, 129, 0.1);
-            --pos-cen-text: #34D399;
-            --pos-del-bg: rgba(239, 68, 68, 0.1);
-            --pos-del-text: #F87171;
-        }
-        .player-list-pro {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            border-radius: 8px;
-            padding: 8px;
-        }
-        .player-row-pro {
-            display: flex;
-            align-items: center;
-            padding: 12px 8px;
-            border-bottom: 1px solid var(--border-color);
-            transition: background-color 0.2s ease-in-out;
-        }
-        .player-row-pro:last-child {
-            border-bottom: none;
-        }
-        .player-row-pro:hover {
-            background-color: var(--row-bg-hover);
-        }
-        .player-info {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .player-name-pro {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-        .position-chip {
-            font-size: 0.75rem;
-            font-weight: 500;
-            padding: 2px 8px;
-            border-radius: 12px;
-            width: fit-content;
-        }
-        .pos-por { background-color: var(--pos-por-bg); color: var(--pos-por-text); }
-        .pos-def { background-color: var(--pos-def-bg); color: var(--pos-def-text); }
-        .pos-cen { background-color: var(--pos-cen-bg); color: var(--pos-cen-text); }
-        .pos-del { background-color: var(--pos-del-bg); color: var(--pos-del-text); }
-        .player-actions {
-            display: flex;
-            align-items: center;
-        }
-        .delete-button-pro {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 4px;
-            opacity: 0.4;
-            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-        }
-        .player-row-pro:hover .delete-button-pro {
-            opacity: 1;
-        }
-        .delete-button-pro:hover {
-            transform: scale(1.1);
-        }
-        .delete-button-pro svg {
-            width: 20px;
-            height: 20px;
-            stroke: var(--text-secondary);
-        }
-        .delete-button-pro:hover svg {
-            stroke: #EF4444;
-        }
 
-        /* Desktop view */
-        @media (min-width: 768px) {
+# Genera una lista HTML profesional y editable para la plantilla de jugadores
+def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
+    # CSS
+    css_styles = """
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+            :root {
+                --bg-dark: #111827;
+                --row-bg: #1F2937;
+                --row-bg-hover: #374151;
+                --text-primary: #F9FAFB;
+                --text-secondary: #9CA3AF;
+                --border-color: #374151;
+                
+                --pos-por-bg: rgba(234, 179, 8, 0.1);
+                --pos-por-text: #FBBF24;
+                --pos-def-bg: rgba(59, 130, 246, 0.1);
+                --pos-def-text: #60A5FA;
+                --pos-cen-bg: rgba(16, 185, 129, 0.1);
+                --pos-cen-text: #34D399;
+                --pos-del-bg: rgba(239, 68, 68, 0.1);
+                --pos-del-text: #F87171;
+            }
+            .player-list-pro {
+                font-family: 'Inter', sans-serif;
+                background-color: var(--bg-dark);
+                border-radius: 8px;
+                padding: 8px;
+            }
             .player-row-pro {
-                flex-wrap: nowrap;
+                display: flex;
+                align-items: center;
+                padding: 12px 8px;
+                border-bottom: 1px solid var(--border-color);
+                transition: background-color 0.2s ease-in-out;
+            }
+            .player-row-pro:last-child {
+                border-bottom: none;
+            }
+            .player-row-pro:hover {
+                background-color: var(--row-bg-hover);
             }
             .player-info {
-                flex-direction: row;
-                align-items: center;
-                gap: 16px;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
             }
-        }
-    </style>
+            .player-name-pro {
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--text-primary);
+            }
+            .position-chip {
+                font-size: 0.75rem;
+                font-weight: 500;
+                padding: 2px 8px;
+                border-radius: 12px;
+                width: fit-content;
+            }
+            .pos-por { background-color: var(--pos-por-bg); color: var(--pos-por-text); }
+            .pos-def { background-color: var(--pos-def-bg); color: var(--pos-def-text); }
+            .pos-cen { background-color: var(--pos-cen-bg); color: var(--pos-cen-text); }
+            .pos-del { background-color: var(--pos-del-bg); color: var(--pos-del-text); }
+            .player-actions {
+                display: flex;
+                align-items: center;
+            }
+            .delete-button-pro {
+                background: none;
+                border: none;
+                cursor: pointer;
+                padding: 4px;
+                opacity: 0.4;
+                transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+            }
+            .player-row-pro:hover .delete-button-pro {
+                opacity: 1;
+            }
+            .delete-button-pro:hover {
+                transform: scale(1.1);
+            }
+            .delete-button-pro svg {
+                width: 20px;
+                height: 20px;
+                stroke: var(--text-secondary);
+            }
+            .delete-button-pro:hover svg {
+                stroke: #EF4444;
+            }
+
+            /* Desktop view */
+            @media (min-width: 768px) {
+                .player-row-pro {
+                    flex-wrap: nowrap;
+                }
+                .player-info {
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 16px;
+                }
+            }
+        </style>
     """
     
-    # --- HTML Rows ---
+    # HTML ROWS
     rows_html = ""
     for _, jugador in df_jugadores.iterrows():
+        
         # Asegurarse de que las claves existen
         player_id = jugador.get('id', '')
         nombre = jugador.get('Nombre', 'N/A')
@@ -143,65 +144,65 @@ def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
         
         pos_class = f"pos-{posicion.lower()}"
         rows_html += f"""
-        <div class="player-row-pro">
-            <div class="player-info">
-                <span class="player-name-pro">{nombre}</span>
-                <span class="position-chip {pos_class}">{posicion}</span>
+            <div class="player-row-pro">
+                <div class="player-info">
+                    <span class="player-name-pro">{nombre}</span>
+                    <span class="position-chip {pos_class}">{posicion}</span>
+                </div>
+                <div class="player-actions">
+                    <button class="delete-button-pro" aria-label="Eliminar a {nombre}" onclick="deletePlayer('{player_id}')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <div class="player-actions">
-                <button class="delete-button-pro" aria-label="Eliminar a {nombre}" onclick="deletePlayer('{player_id}')">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
-                    </svg>
-                </button>
-            </div>
-        </div>
         """
 
-    # --- JavaScript ---
+    # JAVASCRIPT
     js_script = """
-    <script>
-        function deletePlayer(playerId) {
-            // Obtener la plantilla actual de localStorage
-            let plantillaStr = localStorage.getItem('fantasy_plantilla');
-            if (plantillaStr) {
-                let plantilla = JSON.parse(plantillaStr);
-                
-                // Filtrar para eliminar el jugador con el id
-                // Asegurarse de comparar tipos correctos (string vs number)
-                let updatedPlantilla = plantilla.filter(p => String(p.id) !== String(playerId));
-                
-                // Guardar la plantilla actualizada
-                localStorage.setItem('fantasy_plantilla', JSON.stringify(updatedPlantilla));
-                
-                // Forzar un reload para que Streamlit se actualice
-                window.parent.location.reload();
+        <script>
+            function deletePlayer(playerId) {
+                // OBTENER LA PLANTILLA DESDE LOCALSTORAGE
+                let plantillaStr = localStorage.getItem('fantasy_plantilla');
+                if (plantillaStr) {
+                    let plantilla = JSON.parse(plantillaStr);
+                    
+                    // FILTRAR EL JUGADOR A ELIMINAR
+                    // Asegurarse de comparar tipos correctos (string vs number)
+                    let updatedPlantilla = plantilla.filter(p => String(p.id) !== String(playerId));
+                    
+                    // GUARDAR LA PLANTILLA ACTUALIZADA EN LOCALSTORAGE
+                    localStorage.setItem('fantasy_plantilla', JSON.stringify(updatedPlantilla));
+                    
+                    // FORZAR RECARGA DE LA PÁGINA
+                    window.parent.location.reload();
+                }
             }
-        }
-    </script>
+        </script>
     """
 
     full_html = f"""
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        {css_styles}
-    </head>
-    <body>
-        <div class="player-list-pro">
-            {''.join(rows_html)}
-        </div>
-        {js_script}
-    </body>
-    </html>
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                {css_styles}
+            </head>
+            <body>
+                <div class="player-list-pro">
+                    {''.join(rows_html)}
+                </div>
+                {js_script}
+            </body>
+        </html>
     """
     return full_html
 
 
+# Genera el HTML para una única tarjeta de jugador.
 def _generar_card_html(jugador: pd.Series) -> str:
-    """Genera el HTML para una única tarjeta de jugador."""
     prob = jugador.get('Probabilidad_num', 0)
     if prob >= 80: color_bg, color_txt, border_col = "#dcfce7", "#166534", "#22c55e"
     elif prob >= 60: color_bg, color_txt, border_col = "#fef9c3", "#854d0e", "#eab308"
@@ -221,33 +222,32 @@ def _generar_card_html(jugador: pd.Series) -> str:
     equipo = jugador.get('Equipo', 'N/A')
 
     return f"""
-    <div class="card-container">
-        <div class="player-card" 
-             style="--mouse-x: 50%; --mouse-y: 50%;"
-             data-nombre="{jugador.get('Mi_nombre', 'N/A')}" 
-             data-equipo="{equipo}" 
-             data-posicion="{posicion}"
-             data-probabilidad="{int(prob)}"
-             data-imagen-url="{imagen_url}"
-             data-perfil-url="{perfil_url}">
-            <div class="player-card-inner">
-                <div class="card-header">
-                    <span class="pos-pill">{posicion}</span>
-                    <span class="prob-pill" style="background:{color_bg}; color:{color_txt};">{int(prob)}%</span>
+        <div class="card-container">
+            <div class="player-card" 
+                style="--mouse-x: 50%; --mouse-y: 50%;"
+                data-nombre="{jugador.get('Mi_nombre', 'N/A')}" 
+                data-equipo="{equipo}" 
+                data-posicion="{posicion}"
+                data-probabilidad="{int(prob)}"
+                data-imagen-url="{imagen_url}"
+                data-perfil-url="{perfil_url}">
+                <div class="player-card-inner">
+                    <div class="card-header">
+                        <span class="pos-pill">{posicion}</span>
+                        <span class="prob-pill" style="background:{color_bg}; color:{color_txt};">{int(prob)}%</span>
+                    </div>
+                    <div class="player-image-small">
+                        <img src="{imagen_url}" alt="{nombre_display}" onerror="this.onerror=null;this.src='https://static.futbolfantasy.com/images/default-black.jpg';">
+                    </div>
+                    <div class="card-body">
+                        <div class="p-name">{nombre_display}</div>
+                        <div class="p-team">{equipo}</div>
+                    </div>
+                    <div class="health-bar" style="background:{border_col}; width:{prob}%;"></div>
                 </div>
-                <div class="player-image-small">
-                    <img src="{imagen_url}" alt="{nombre_display}" onerror="this.onerror=null;this.src='https://static.futbolfantasy.com/images/default-black.jpg';">
-                </div>
-                <div class="card-body">
-                    <div class="p-name">{nombre_display}</div>
-                    <div class="p-team">{equipo}</div>
-                </div>
-                <div class="health-bar" style="background:{border_col}; width:{prob}%;"></div>
             </div>
         </div>
-    </div>
     """
-
 
 
 def generar_html_alineacion_completa(
@@ -323,260 +323,260 @@ def generar_html_alineacion_completa(
     # 4. HTML completo con CSS y JS
     background_style = "background: #f0f2f6;" if render_for_screenshot else "background: transparent;"
     full_html = f"""
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-            :root {{ --grass-dark: #2f7a38; --grass-light: #3a8a44; --line-white: rgba(255,255,255,0.7); }}
-            * {{ box-sizing: border-box; }}
-            body {{ 
-                margin: 0; padding: 20px 0; font-family: 'Inter', sans-serif; {background_style}
-                display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
-            }}
-            .pitch-wrapper {{ width: 100%; max-width: 500px; aspect-ratio: 2/3.1; position: relative; margin: 0 auto; }}
-            .pitch {{
-                width: 100%; height: 100%;
-                background-color: var(--grass-dark);
-                background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(0,0,0,0.05) 10%, rgba(0,0,0,0.05) 20%);
-                border: 2px solid white; border-radius: 16px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-                display: flex; flex-direction: column; position: relative; overflow: hidden;
-            }}
-            .line-half {{ position: absolute; top: 50%; width: 100%; height: 2px; background: var(--line-white); }}
-            .circle-center {{ position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20%; aspect-ratio: 1/1; border: 2px solid var(--line-white); border-radius: 50%; }}
-            .area {{ position: absolute; left: 50%; transform: translateX(-50%); width: 40%; height: 6%; border: 2px solid var(--line-white); }}
-            .area.top {{ top: 0; border-top: 0; }}
-            .area.bot {{ bottom: 0; border-bottom: 0; }}
-            .formation-badge {{
-                position: absolute; bottom: 12px; right: 12px;
-                background: rgba(0,0,0,0.6); color: white;
-                padding: 4px 10px; border-radius: 20px;
-                font-size: 12px; font-weight: 800; z-index: 5;
-                backdrop-filter: blur(4px);
-            }}
-            /* Contenedor de botones de acción */
-            .action-buttons {{
-                position: absolute; bottom: 12px; left: 12px;
-                z-index: 10; display: flex; gap: 8px;
-            }}
-            .action-btn, .action-btn-sub {{
-                width: 36px; height: 36px; border-radius: 50%;
-                background: rgba(0,0,0,0.6); color: white; border: none; cursor: pointer;
-                display: flex; align-items: center; justify-content: center;
-                transition: all 0.2s ease-in-out; backdrop-filter: blur(4px);
-                box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            }}
-            .action-btn:hover, .action-btn-sub:hover {{
-                transform: scale(1.1); background: rgba(0,0,0,0.8);
-            }}
-            .action-btn svg, .action-btn-sub svg {{ width: 20px; height: 20px; }}
-            /* Menú de compartir */
-            .share-menu {{ position: relative; }}
-            .share-options {{
-                display: flex; flex-direction: column-reverse; gap: 8px;
-                position: absolute; bottom: 44px; left: 0;
-                opacity: 0; visibility: hidden;
-                transform: translateY(10px); transition: all 0.2s ease-in-out;
-            }}
-            .share-menu:hover .share-options {{
-                opacity: 1; visibility: visible; transform: translateY(0);
-            }}
-            .action-btn-sub.twitter-btn {{ background: #000; }}
-            .action-btn-sub.whatsapp-btn {{ background: #25D366; }}
-            .img-btn {{ background-color: #4A90E2; }}
-            .pdf-btn {{ background-color: #D0021B; }}
+        <!DOCTYPE html>
+        <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+                    :root {{ --grass-dark: #2f7a38; --grass-light: #3a8a44; --line-white: rgba(255,255,255,0.7); }}
+                    * {{ box-sizing: border-box; }}
+                    body {{ 
+                        margin: 0; padding: 20px 0; font-family: 'Inter', sans-serif; {background_style}
+                        display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
+                    }}
+                    .pitch-wrapper {{ width: 100%; max-width: 500px; aspect-ratio: 2/3.1; position: relative; margin: 0 auto; }}
+                    .pitch {{
+                        width: 100%; height: 100%;
+                        background-color: var(--grass-dark);
+                        background-image: repeating-linear-gradient(0deg, transparent, transparent 10%, rgba(0,0,0,0.05) 10%, rgba(0,0,0,0.05) 20%);
+                        border: 2px solid white; border-radius: 16px;
+                        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+                        display: flex; flex-direction: column; position: relative; overflow: hidden;
+                    }}
+                    .line-half {{ position: absolute; top: 50%; width: 100%; height: 2px; background: var(--line-white); }}
+                    .circle-center {{ position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20%; aspect-ratio: 1/1; border: 2px solid var(--line-white); border-radius: 50%; }}
+                    .area {{ position: absolute; left: 50%; transform: translateX(-50%); width: 40%; height: 6%; border: 2px solid var(--line-white); }}
+                    .area.top {{ top: 0; border-top: 0; }}
+                    .area.bot {{ bottom: 0; border-bottom: 0; }}
+                    .formation-badge {{
+                        position: absolute; bottom: 12px; right: 12px;
+                        background: rgba(0,0,0,0.6); color: white;
+                        padding: 4px 10px; border-radius: 20px;
+                        font-size: 12px; font-weight: 800; z-index: 5;
+                        backdrop-filter: blur(4px);
+                    }}
+                    /* CONTENEDOR DE BOTONES DE ACCION */
+                    .action-buttons {{
+                        position: absolute; bottom: 12px; left: 12px;
+                        z-index: 10; display: flex; gap: 8px;
+                    }}
+                    .action-btn, .action-btn-sub {{
+                        width: 36px; height: 36px; border-radius: 50%;
+                        background: rgba(0,0,0,0.6); color: white; border: none; cursor: pointer;
+                        display: flex; align-items: center; justify-content: center;
+                        transition: all 0.2s ease-in-out; backdrop-filter: blur(4px);
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+                    }}
+                    .action-btn:hover, .action-btn-sub:hover {{
+                        transform: scale(1.1); background: rgba(0,0,0,0.8);
+                    }}
+                    .action-btn svg, .action-btn-sub svg {{ width: 20px; height: 20px; }}
+                    /* MENÚ DE COMPARTIR */
+                    .share-menu {{ position: relative; }}
+                    .share-options {{
+                        display: flex; flex-direction: column-reverse; gap: 8px;
+                        position: absolute; bottom: 44px; left: 0;
+                        opacity: 0; visibility: hidden;
+                        transform: translateY(10px); transition: all 0.2s ease-in-out;
+                    }}
+                    .share-menu:hover .share-options {{
+                        opacity: 1; visibility: visible; transform: translateY(0);
+                    }}
+                    .action-btn-sub.twitter-btn {{ background: #000; }}
+                    .action-btn-sub.whatsapp-btn {{ background: #25D366; }}
+                    .img-btn {{ background-color: #4A90E2; }}
+                    .pdf-btn {{ background-color: #D0021B; }}
 
-            .line {{ flex: 1; display: flex; align-items: center; width: 100%; padding: 0 4px; z-index: 2; }}
-            .card-container {{ width: 19%; display: flex; justify-content: center; perspective: 1000px; }}
-            .player-card {{ width: 100%; max-width: 85px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.1s linear; }}
-            .player-card-inner {{
-                position: relative; width: 100%;
-                background: linear-gradient(160deg, rgba(248, 250, 252, 0.85), rgba(238, 242, 247, 0.75));
-                backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-                border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-                overflow: hidden; display: flex; flex-direction: column;
-                border: 1px solid rgba(255, 255, 255, 0.5);
-                transform: translateZ(0); transition: box-shadow 0.3s ease;
-                padding-bottom: 3px;
-            }}
-            .player-card-inner.clicked {{ box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0,0,0,0.25); }}
-            .player-card-inner::before, .player-card-inner::after {{
-                content: ''; position: absolute; top: 0; left: 0;
-                width: 100%; height: 100%; z-index: 0; pointer-events: none;
-            }}
-            .player-card-inner::before {{
-                background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(180, 210, 255, 0.6) 0%, rgba(200, 180, 255, 0.5) 25%, transparent 50%);
-                opacity: 0; transition: opacity 0.4s ease;
-            }}
-            .player-card:hover .player-card-inner::before {{ opacity: 1; }}
-            .player-card-inner::after {{
-                left: -150%; width: 80%;
-                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-                transform: skewX(-25deg); transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-            }}
-            .player-card:hover .player-card-inner::after {{ left: 150%; }}
-            .card-header, .player-image-small, .card-body, .health-bar {{ z-index: 1; }}
-            .card-header {{ display: flex; justify-content: space-between; align-items: center; padding: 3px 4px; font-size: 9px; font-weight: 700; color: #555; }}
-            .player-image-small {{ height: 50px; width: 100%; overflow: hidden; }}
-            .player-image-small img {{ width: 100%; height: 100%; object-fit: cover; object-position: top; }}
-            .card-body {{ text-align: center; padding: 2px 2px 6px 2px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }}
-            .p-name {{ font-size: clamp(10px, 2.5vw, 12px); font-weight: 800; color: #1e293b; line-height: 1.1; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-            .p-team {{ font-size: 8px; color: #64748b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
-            .health-bar {{ position: absolute; bottom: 0; left: 0; height: 3px; }}
+                    .line {{ flex: 1; display: flex; align-items: center; width: 100%; padding: 0 4px; z-index: 2; }}
+                    .card-container {{ width: 19%; display: flex; justify-content: center; perspective: 1000px; }}
+                    .player-card {{ width: 100%; max-width: 85px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.1s linear; }}
+                    .player-card-inner {{
+                        position: relative; width: 100%;
+                        background: linear-gradient(160deg, rgba(248, 250, 252, 0.85), rgba(238, 242, 247, 0.75));
+                        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+                        border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+                        overflow: hidden; display: flex; flex-direction: column;
+                        border: 1px solid rgba(255, 255, 255, 0.5);
+                        transform: translateZ(0); transition: box-shadow 0.3s ease;
+                        padding-bottom: 3px;
+                    }}
+                    .player-card-inner.clicked {{ box-shadow: 0 0 25px rgba(255, 255, 255, 0.8), 0 4px 12px rgba(0,0,0,0.25); }}
+                    .player-card-inner::before, .player-card-inner::after {{
+                        content: ''; position: absolute; top: 0; left: 0;
+                        width: 100%; height: 100%; z-index: 0; pointer-events: none;
+                    }}
+                    .player-card-inner::before {{
+                        background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), rgba(180, 210, 255, 0.6) 0%, rgba(200, 180, 255, 0.5) 25%, transparent 50%);
+                        opacity: 0; transition: opacity 0.4s ease;
+                    }}
+                    .player-card:hover .player-card-inner::before {{ opacity: 1; }}
+                    .player-card-inner::after {{
+                        left: -150%; width: 80%;
+                        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                        transform: skewX(-25deg); transition: left 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+                    }}
+                    .player-card:hover .player-card-inner::after {{ left: 150%; }}
+                    .card-header, .player-image-small, .card-body, .health-bar {{ z-index: 1; }}
+                    .card-header {{ display: flex; justify-content: space-between; align-items: center; padding: 3px 4px; font-size: 9px; font-weight: 700; color: #555; }}
+                    .player-image-small {{ height: 50px; width: 100%; overflow: hidden; }}
+                    .player-image-small img {{ width: 100%; height: 100%; object-fit: cover; object-position: top; }}
+                    .card-body {{ text-align: center; padding: 2px 2px 6px 2px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }}
+                    .p-name {{ font-size: clamp(10px, 2.5vw, 12px); font-weight: 800; color: #1e293b; line-height: 1.1; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+                    .p-team {{ font-size: 8px; color: #64748b; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+                    .health-bar {{ position: absolute; bottom: 0; left: 0; height: 3px; }}
 
-            /* Estilos del Banquillo */
-            .bench-title {{ width: 100%; text-align: center; margin: 20px 0 10px 0; font-size: 20px; font-weight: 800; color: #333; text-transform: uppercase; letter-spacing: 1px; }}
-            .bench-title span {{ background: #f0f2f6; padding: 5px 20px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
-            .bench-container {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 10px; width: 100%; max-width: 900px; }}
-            .bench-container .card-container {{ width: 100px; }}
-            .bench-container .player-card {{ max-width: 100px; }}
+                    /* ESTILOS DEL BANQUILLO */
+                    .bench-title {{ width: 100%; text-align: center; margin: 20px 0 10px 0; font-size: 20px; font-weight: 800; color: #333; text-transform: uppercase; letter-spacing: 1px; }}
+                    .bench-title span {{ background: #f0f2f6; padding: 5px 20px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+                    .bench-container {{ display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding: 10px; width: 100%; max-width: 900px; }}
+                    .bench-container .card-container {{ width: 100px; }}
+                    .bench-container .player-card {{ max-width: 100px; }}
 
-            /* Modal Styles */
-            .modal-overlay {{ position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }}
-            .modal-overlay.visible {{ opacity: 1; visibility: visible; }}
-            .modal-card {{ width: 90%; max-width: 340px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 20px; color: #333; transform: scale(0.95); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; }}
-            .modal-overlay.visible .modal-card {{ transform: scale(1); opacity: 1; }}
-            .modal-close {{ position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); color: #333; border: none; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; }}
-            #modal-player-image {{ width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 10px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }}
-            #modal-player-image img {{ width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }}
-            #modal-player-name {{ font-size: 28px; font-weight: 800; margin: 8px 0; line-height: 1.1; color: #1a202c; text-align: center; transform: translateY(20px); opacity: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-            #modal-player-team {{ font-size: 16px; color: #4a5568; text-align: center; transform: translateY(20px); opacity: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-            .modal-stats {{ display: flex; justify-content: space-around; margin-top: 15px; transform: translateY(20px); opacity: 0;}}
-            .stat {{ text-align: center; }}
-            .stat-value {{ font-size: 24px; font-weight: 800; color: #2d3748; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
-            .stat-label {{ font-size: 12px; color: #718096; }}
-            .modal-footer-link {{ display: block; text-align: center; color: #4299e1; text-decoration: none; margin-top: 20px; font-weight: 600; transform: translateY(20px); opacity: 0; }}
-            .modal-overlay.visible .modal-card > *:not(#modal-player-image) {{ transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease; }}
-            .modal-overlay.visible #modal-player-name {{ transition-delay: 0.1s; }}
-            .modal-overlay.visible #modal-player-team {{ transition-delay: 0.15s; }}
-            .modal-overlay.visible .modal-stats {{ transition-delay: 0.2s; }}
-            .modal-overlay.visible .modal-footer-link {{ transition-delay: 0.25s; }}
-            .modal-overlay.visible .modal-card > *:not(.modal-close):not(#modal-player-image) {{ transform: translateY(0); opacity: 1; }}
+                    /* ESTILOS DEL MODAL */
+                    .modal-overlay {{ position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 100; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }}
+                    .modal-overlay.visible {{ opacity: 1; visibility: visible; }}
+                    .modal-card {{ width: 90%; max-width: 340px; background: rgba(255, 255, 255, 0.25); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.3); padding: 20px; color: #333; transform: scale(0.95); opacity: 0; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease; }}
+                    .modal-overlay.visible .modal-card {{ transform: scale(1); opacity: 1; }}
+                    .modal-close {{ position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; background: rgba(0, 0, 0, 0.1); color: #333; border: none; cursor: pointer; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; }}
+                    #modal-player-image {{ width: 100%; height: 200px; border-radius: 12px; overflow: hidden; margin: 10px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }}
+                    #modal-player-image img {{ width: 100%; height: 100%; object-fit: cover; object-position: center 15%; }}
+                    #modal-player-name {{ font-size: 28px; font-weight: 800; margin: 8px 0; line-height: 1.1; color: #1a202c; text-align: center; transform: translateY(20px); opacity: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+                    #modal-player-team {{ font-size: 16px; color: #4a5568; text-align: center; transform: translateY(20px); opacity: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+                    .modal-stats {{ display: flex; justify-content: space-around; margin-top: 15px; transform: translateY(20px); opacity: 0;}}
+                    .stat {{ text-align: center; }}
+                    .stat-value {{ font-size: 24px; font-weight: 800; color: #2d3748; text-shadow: 0 1px 3px rgba(0,0,0,0.1); }}
+                    .stat-label {{ font-size: 12px; color: #718096; }}
+                    .modal-footer-link {{ display: block; text-align: center; color: #4299e1; text-decoration: none; margin-top: 20px; font-weight: 600; transform: translateY(20px); opacity: 0; }}
+                    .modal-overlay.visible .modal-card > *:not(#modal-player-image) {{ transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.4s ease; }}
+                    .modal-overlay.visible #modal-player-name {{ transition-delay: 0.1s; }}
+                    .modal-overlay.visible #modal-player-team {{ transition-delay: 0.15s; }}
+                    .modal-overlay.visible .modal-stats {{ transition-delay: 0.2s; }}
+                    .modal-overlay.visible .modal-footer-link {{ transition-delay: 0.25s; }}
+                    .modal-overlay.visible .modal-card > *:not(.modal-close):not(#modal-player-image) {{ transform: translateY(0); opacity: 1; }}
 
-            @media (prefers-color-scheme: dark) {{
-                body {{ background: #0e1117; }}
-                .bench-title {{ color: #e5e7eb; }}
-                .bench-title span {{ background: #262730; }}
-            }}
-            @media (min-width: 768px) {{
-                .pitch-wrapper {{ max-width: 600px; aspect-ratio: unset; height: 650px; }}
-                .player-card {{ max-width: 100px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
-                .p-name {{ font-size: 13px; }}
-                .p-team {{ font-size: 10px; }}
-                .card-header {{ font-size: 10px; padding: 5px; }}
-                .player-image-small {{ height: 65px; }}
-                .bench-container .card-container {{ width: 120px; }}
-                .bench-container .player-card {{ max-width: 120px; }}
-            }}
-        </style>
-    </head>
-    <body>
-        <div class="pitch-wrapper">
-            <div class="pitch">
-                {action_buttons_html}
-                <div class="formation-badge">{formacion_str}</div>
-                <div class="area top"></div>
-                <div class="area bot"></div>
-                <div class="line-half"></div>
-                <div class="circle-center"></div>
-                {lineas_html}
-            </div>
-        </div>
-
-        {banquillo_html}
-
-        <div id="player-modal" class="modal-overlay">
-            <div class="modal-card">
-                <button class="modal-close">&times;</button>
-                <div id="modal-player-image"><img src="" alt="Foto del jugador"></div>
-                <h2 id="modal-player-name">Nombre Jugador</h2>
-                <p id="modal-player-team">Equipo</p>
-                <div class="modal-stats">
-                    <div class="stat">
-                        <div id="modal-pos" class="stat-value"></div>
-                        <div class="stat-label">Posición</div>
-                    </div>
-                    <div class="stat">
-                        <div id="modal-prob" class="stat-value"></div>
-                        <div class="stat-label">Prob. XI</div>
+                    @media (prefers-color-scheme: dark) {{
+                        body {{ background: #0e1117; }}
+                        .bench-title {{ color: #e5e7eb; }}
+                        .bench-title span {{ background: #262730; }}
+                    }}
+                    @media (min-width: 768px) {{
+                        .pitch-wrapper {{ max-width: 600px; aspect-ratio: unset; height: 650px; }}
+                        .player-card {{ max-width: 100px; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }}
+                        .p-name {{ font-size: 13px; }}
+                        .p-team {{ font-size: 10px; }}
+                        .card-header {{ font-size: 10px; padding: 5px; }}
+                        .player-image-small {{ height: 65px; }}
+                        .bench-container .card-container {{ width: 120px; }}
+                        .bench-container .player-card {{ max-width: 120px; }}
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="pitch-wrapper">
+                    <div class="pitch">
+                        {action_buttons_html}
+                        <div class="formation-badge">{formacion_str}</div>
+                        <div class="area top"></div>
+                        <div class="area bot"></div>
+                        <div class="line-half"></div>
+                        <div class="circle-center"></div>
+                        {lineas_html}
                     </div>
                 </div>
-                <a id="modal-profile-link" href="#" target="_blank" class="modal-footer-link">Ver perfil completo</a>
-            </div>
-        </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {{
-                const modal = document.getElementById('player-modal');
-                const modalClose = modal.querySelector('.modal-close');
-                const playerCards = document.querySelectorAll('.player-card');
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                if (isMobile) {{ setupGyro(); }} else {{ setupMouse(); }}
+                {banquillo_html}
 
-                function setupGyro() {{
-                    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {{
-                        document.body.addEventListener('click', function requestGyroPermission() {{
-                            DeviceOrientationEvent.requestPermission()
-                                .then(p => {{ if (p === 'granted') window.addEventListener('deviceorientation', handleOrientation); }})
-                                .catch(console.error);
-                        }}, {{ once: true }});
-                    }} else if (typeof DeviceOrientationEvent !== 'undefined') {{
-                        window.addEventListener('deviceorientation', handleOrientation);
-                    }}
-                }}
-                
-                function handleOrientation(event) {{
-                    const beta = event.beta, gamma = event.gamma;
-                    if (beta === null || gamma === null) return;
-                    const rotX = Math.max(-45, Math.min(45, beta)) * 0.25;
-                    const rotY = Math.max(-45, Math.min(45, gamma)) * 0.5;
-                    window.requestAnimationFrame(() => {{
-                        playerCards.forEach(c => c.style.transform = `rotateX(${{rotX}}deg) rotateY(${{rotY}}deg) scale(1.03)`);
-                    }});
-                }}
-                
-                function setupMouse() {{
-                    playerCards.forEach(card => {{
-                        const inner = card.querySelector('.player-card-inner');
-                        card.addEventListener('mousemove', (e) => {{
-                            const r = card.getBoundingClientRect();
-                            const x = e.clientX - r.left, y = e.clientY - r.top;
-                            const rotX = (y - r.height / 2) / (r.height / 2) * -8;
-                            const rotY = (x - r.width / 2) / (r.width / 2) * 8;
+                <div id="player-modal" class="modal-overlay">
+                    <div class="modal-card">
+                        <button class="modal-close">&times;</button>
+                        <div id="modal-player-image"><img src="" alt="Foto del jugador"></div>
+                        <h2 id="modal-player-name">Nombre Jugador</h2>
+                        <p id="modal-player-team">Equipo</p>
+                        <div class="modal-stats">
+                            <div class="stat">
+                                <div id="modal-pos" class="stat-value"></div>
+                                <div class="stat-label">Posición</div>
+                            </div>
+                            <div class="stat">
+                                <div id="modal-prob" class="stat-value"></div>
+                                <div class="stat-label">Prob. XI</div>
+                            </div>
+                        </div>
+                        <a id="modal-profile-link" href="#" target="_blank" class="modal-footer-link">Ver perfil completo</a>
+                    </div>
+                </div>
+
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {{
+                        const modal = document.getElementById('player-modal');
+                        const modalClose = modal.querySelector('.modal-close');
+                        const playerCards = document.querySelectorAll('.player-card');
+                        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                        if (isMobile) {{ setupGyro(); }} else {{ setupMouse(); }}
+
+                        function setupGyro() {{
+                            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {{
+                                document.body.addEventListener('click', function requestGyroPermission() {{
+                                    DeviceOrientationEvent.requestPermission()
+                                        .then(p => {{ if (p === 'granted') window.addEventListener('deviceorientation', handleOrientation); }})
+                                        .catch(console.error);
+                                }}, {{ once: true }});
+                            }} else if (typeof DeviceOrientationEvent !== 'undefined') {{
+                                window.addEventListener('deviceorientation', handleOrientation);
+                            }}
+                        }}
+                        
+                        function handleOrientation(event) {{
+                            const beta = event.beta, gamma = event.gamma;
+                            if (beta === null || gamma === null) return;
+                            const rotX = Math.max(-45, Math.min(45, beta)) * 0.25;
+                            const rotY = Math.max(-45, Math.min(45, gamma)) * 0.5;
                             window.requestAnimationFrame(() => {{
-                                card.style.transform = `rotateX(${{rotX}}deg) rotateY(${{rotY}}deg) scale(1.05)`;
+                                playerCards.forEach(c => c.style.transform = `rotateX(${{rotX}}deg) rotateY(${{rotY}}deg) scale(1.03)`);
                             }});
-                            card.style.setProperty('--mouse-x', `${{(x / r.width) * 100}}%`);
-                            card.style.setProperty('--mouse-y', `${{(y / r.height) * 100}}%`);
+                        }}
+                        
+                        function setupMouse() {{
+                            playerCards.forEach(card => {{
+                                const inner = card.querySelector('.player-card-inner');
+                                card.addEventListener('mousemove', (e) => {{
+                                    const r = card.getBoundingClientRect();
+                                    const x = e.clientX - r.left, y = e.clientY - r.top;
+                                    const rotX = (y - r.height / 2) / (r.height / 2) * -8;
+                                    const rotY = (x - r.width / 2) / (r.width / 2) * 8;
+                                    window.requestAnimationFrame(() => {{
+                                        card.style.transform = `rotateX(${{rotX}}deg) rotateY(${{rotY}}deg) scale(1.05)`;
+                                    }});
+                                    card.style.setProperty('--mouse-x', `${{(x / r.width) * 100}}%`);
+                                    card.style.setProperty('--mouse-y', `${{(y / r.height) * 100}}%`);
+                                }});
+                                card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0) rotateY(0) scale(1)');
+                            }});
+                        }}
+
+                        function showModal(data) {{
+                            document.getElementById('modal-prob').innerText = data.probabilidad + '%';
+                            document.getElementById('modal-pos').innerText = data.posicion;
+                            document.getElementById('modal-player-name').innerText = data.nombre;
+                            document.getElementById('modal-player-team').innerText = data.equipo;
+                            document.getElementById('modal-player-image').querySelector('img').src = data.imagenUrl;
+                            document.getElementById('modal-profile-link').href = data.perfilUrl;
+                            modal.classList.add('visible');
+                        }}
+
+                        function hideModal() {{ modal.classList.remove('visible'); }}
+
+                        playerCards.forEach(card => {{
+                            card.addEventListener('click', function() {{ showModal(this.dataset); }});
                         }});
-                        card.addEventListener('mouseleave', () => card.style.transform = 'rotateX(0) rotateY(0) scale(1)');
+
+                        modalClose.addEventListener('click', hideModal);
+                        modal.addEventListener('click', e => {{ if (e.target === modal) hideModal(); }});
                     }});
-                }}
-
-                function showModal(data) {{
-                    document.getElementById('modal-prob').innerText = data.probabilidad + '%';
-                    document.getElementById('modal-pos').innerText = data.posicion;
-                    document.getElementById('modal-player-name').innerText = data.nombre;
-                    document.getElementById('modal-player-team').innerText = data.equipo;
-                    document.getElementById('modal-player-image').querySelector('img').src = data.imagenUrl;
-                    document.getElementById('modal-profile-link').href = data.perfilUrl;
-                    modal.classList.add('visible');
-                }}
-
-                function hideModal() {{ modal.classList.remove('visible'); }}
-
-                playerCards.forEach(card => {{
-                    card.addEventListener('click', function() {{ showModal(this.dataset); }});
-                }});
-
-                modalClose.addEventListener('click', hideModal);
-                modal.addEventListener('click', e => {{ if (e.target === modal) hideModal(); }});
-            }});
-        </script>
-    </body>
-    </html>
+                </script>
+            </body>
+        </html>
     """
     return full_html
