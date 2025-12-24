@@ -1,45 +1,78 @@
-# ⚽ Fantasy XI Assistant v3
-*Asistente inteligente para optimizar tu alineación de fútbol fantasy*
+# ⚽ Fantasy XI Assistant
+_Tu Asistente Inteligente para una Alineación de Fantasy Imbatible_
 
+<div>
+
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
 ![Streamlit](https://img.shields.io/badge/Hecho_con-Streamlit-red?style=for-the-badge&logo=streamlit)
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=for-the-badge&logo=python)
+![Open Source](https://img.shields.io/badge/Open_Source-❤️-purple?style=for-the-badge)
 ![License](https://img.shields.io/badge/Licencia-MIT-green?style=for-the-badge)
 
-Una aplicación web creada con Streamlit que te ayuda a calcular tu alineación ideal para juegos de fútbol fantasy (como Biwenger, LaLiga Fantasy, etc.), utilizando datos de probabilidad de titularidad obtenidos mediante scraping en tiempo real.
-
-Esta versión (v3) ha sido refactorizada para tener una estructura de código modular, limpia y escalable.
+</div>
 
 ---
 
-### 🚀 [**>> ACCEDE A LA APLICACIÓN AQUÍ <<**](https://xi-fantasy.streamlit.app/) 🚀
+<div>
 
----
+**Una aplicación web que lleva tu equipo de fútbol fantasy al siguiente nivel.**
+Calcula tu alineación ideal basándose en probabilidades de titularidad en tiempo real, ayudándote a tomar decisiones basadas en datos, no solo en intuición.
+
+### 🚀 [**>> PRUEBA LA APLICACIÓN EN VIVO AQUÍ <<**](https://xi-fantasy.streamlit.app/) 🚀
+
+</div>
+
+<!-- 
+    ¡Hola! Te recomiendo grabar un GIF corto mostrando la aplicación en acción y ponerlo aquí. 
+    Un buen GIF aumenta el interés en el proyecto enormemente.
+    
+    <p align="center">
+      <img src="URL_A_TU_GIF_AQUÍ" alt="Demostración de Fantasy XI Assistant" width="750"/>
+    </p>
+-->
+
+## 🌟 Sobre el Proyecto
+
+¿Cansado de dudar hasta el último minuto sobre a quién alinear en tu equipo de Biwenger, LaLiga Fantasy o cualquier otro juego similar? **Fantasy XI Assistant** es la herramienta definitiva que elimina las conjeturas. 
+
+La aplicación realiza web scraping sobre [FutbolFantasy](https://www.futbolfantasy.com/), una de las fuentes más fiables, para obtener las probabilidades de que cada jugador de LaLiga sea titular en la próxima jornada. Con esos datos, y según tus preferencias tácticas, un motor de optimización calcula el mejor once inicial posible que puedes presentar con los jugadores de tu plantilla.
 
 ## ✨ Características Principales
 
-*   **📊 Datos en Tiempo Real:** Obtiene las probabilidades de titularidad de los jugadores de LaLiga mediante web scraping al momento.
-*   **✍️ Entrada de Plantilla Flexible:** Introduce tu equipo de tres formas distintas:
-    *   Uno a uno con autocompletado y guardado en local.
-    *   Pegando una lista desde el portapapeles.
-    *   Subiendo un archivo CSV o Excel.
-*   **🧠 Motor de Cálculo Inteligente:** Selecciona el mejor XI posible basándose en las probabilidades y en la formación táctica que definas.
-*   **🏟️ Visualización Espectacular:** Muestra la alineación recomendada en un campo de fútbol visualmente atractivo y moderno.
-*   **⚙️ Totalmente Configurable:** Ajusta los mínimos y máximos por posición (DEF, CEN, DEL) y la sensibilidad del buscador de nombres.
-*   **📄 Exportación a PDF:** Descarga tu XI ideal en un documento PDF limpio y listo para compartir.
+*   **📊 Datos Frescos, Decisiones Inteligentes:** Obtiene las probabilidades de titularidad más recientes para que tus decisiones siempre se basen en la información más actual.
+*   **✍️ Múltiples Formas de Añadir tu Plantilla:**
+    *   **Uno a uno:** Con autocompletado y guardado automático en tu navegador.
+    *   **Pegado Rápido:** Copia y pega tu plantilla directamente.
+    *   **Subida de Archivos:** Compatible con ficheros `.csv` y `.xlsx`.
+*   **🧠 Motor de Optimización Táctica:**
+    *   Define tu sistema de juego (mínimos y máximos de defensas, centrocampistas y delanteros).
+    *   El algoritmo selecciona el 11 titular que maximiza la probabilidad total de jugar.
+*   **🏟️ Visualización Profesional:** Olvídate de aburridas listas. Tu alineación se presenta en un espectacular campo de fútbol interactivo en 3D.
+*   **🔗 Comparte tu Éxito:** Descarga tu alineación en un **PDF** limpio o compártela directamente en **Twitter (X)** y **WhatsApp**.
+*   **🤖 Matching Inteligente de Nombres:** ¿Has escrito mal un nombre? No pasa nada. El sistema es capaz de encontrar la coincidencia más probable.
 
-## 🔧 Cómo Ejecutarlo en Local
+## 🛠️ Stack Tecnológico
 
-Si quieres ejecutar este proyecto en tu propia máquina, sigue estos pasos:
+Este proyecto ha sido construido con un conjunto de herramientas modernas y eficientes de Python:
 
-1.  **Clona el repositorio:**
+*   **Framework Web:** [Streamlit](https://streamlit.io/)
+*   **Análisis y Manipulación de Datos:** [Pandas](https://pandas.pydata.org/)
+*   **Web Scraping:** [Requests](https://requests.readthedocs.io/en/latest/) & [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
+*   **Generación de PDF:** [fpdf2](https://github.com/py-pdf/fpdf2)
+*   **Persistencia en Navegador:** [streamlit-local-storage](https://pypi.org/project/streamlit-local-storage/)
+
+## 🚀 Puesta en Marcha Local
+
+Sigue estos pasos para ejecutar el proyecto en tu propia máquina:
+
+1.  **Clona el Repositorio**
     ```bash
     git clone https://github.com/mariotc1/fantasyHelper.git
     cd fantasyHelper
     ```
 
-2.  **Crea y activa un entorno virtual** (recomendado):
+2.  **Crea y Activa un Entorno Virtual** (Recomendado)
     ```bash
-    # Para Mac/Linux
+    # Para macOS/Linux
     python3 -m venv venv
     source venv/bin/activate
 
@@ -48,38 +81,61 @@ Si quieres ejecutar este proyecto en tu propia máquina, sigue estos pasos:
     .\venv\Scripts\activate
     ```
 
-3.  **Instala las dependencias:**
+3.  **Instala las Dependencias**
     ```bash
     pip install -r requirements.txt
     ```
 
-4.  **Ejecuta la aplicación:**
-    El punto de entrada principal de la aplicación se encuentra en la carpeta `v3_fantasy_helper`.
+4.  **Ejecuta la Aplicación**
+    Navega hasta la carpeta raíz del proyecto y ejecuta el siguiente comando:
     ```bash
-    streamlit run v3_fantasy_helper/fantasy_auto2.py.py
+    streamlit run v3_fantasy_helper/fantasy_auto2.py
     ```
+    ¡La aplicación se abrirá automáticamente en tu navegador!
 
-La aplicación se abrirá automáticamente en tu navegador.
+## 🏗️ Arquitectura del Proyecto
 
-## 🏗️ Estructura del Proyecto (v3)
-
-La versión 3 se ha reestructurado para mejorar la mantenibilidad y claridad del código. La lógica principal reside en `v3_fantasy_helper/` y sigue esta organización:
+Esta aplicación sigue una arquitectura limpia y modular para facilitar su mantenimiento y escalabilidad. La lógica de negocio está completamente separada de la capa de presentación (UI).
 
 ```
 v3_fantasy_helper/
-├── fantasy_auto2.py.py         # Script principal, maneja la UI de Streamlit
-└── src/                        # Directorio con la lógica de negocio
+├── app.py                 # (fantasy_auto2.py) Punto de entrada y orquestador de la app.
+├── assets/                # Ficheros estáticos (CSS, scripts de analíticas).
+│   ├── styles.css
+│   └── google_analytics.html
+└── src/
     ├── __init__.py
-    ├── core.py                 # Algoritmos de matching y selección del XI
-    ├── data_utils.py           # Funciones de limpieza y parseo de datos
-    ├── scraper.py              # Lógica de web scraping
-    └── output_generators.py    # Generadores de PDF y HTML
+    ├── core.py            # Lógica de negocio principal (matching de nombres, selección del XI).
+    ├── data_utils.py      # Utilidades para parsear y limpiar datos de entrada.
+    ├── output_generators.py # Módulos para crear los artefactos de salida (PDF, HTML del campo).
+    ├── scraper.py         # Lógica de web scraping para obtener datos de FutbolFantasy.
+    ├── state_manager.py   # Gestiona el estado de la sesión y la persistencia en local storage.
+    └── ui/                  # Módulos dedicados a construir los componentes de la UI.
+        ├── __init__.py
+        ├── sidebar.py
+        ├── input_tabs.py
+        └── results_tab.py
 ```
+Esta estructura basada en la **Separación de Responsabilidades** asegura que cada parte del código tiene un único propósito, haciendo que el proyecto sea más robusto y fácil de extender con nuevas funcionalidades.
 
-## 🛠️ Tecnologías Utilizadas
+## 🤝 Contribuciones
 
-*   **Frontend:** [Streamlit](https://streamlit.io/)
-*   **Scraping:** [Requests](https://requests.readthedocs.io/en/latest/) y [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/bs4/doc/)
-*   **Análisis de Datos:** [Pandas](https://pandas.pydata.org/)
-*   **Exportación a PDF:** [fpdf2](https://github.com/py-pdf/fpdf2)
-*   **Persistencia en Navegador:** [streamlit-local-storage](https://pypi.org/project/streamlit-local-storage/)
+¡Las contribuciones son bienvenidas! Si tienes ideas para nuevas características, mejoras en el código o has encontrado un bug, por favor, siéntete libre de:
+
+1.  Hacer un **Fork** del proyecto.
+2.  Crear una nueva **Branch** (`git checkout -b feature/AmazingFeature`).
+3.  Hacer tus cambios y hacer **Commit** (`git commit -m 'Add some AmazingFeature'`).
+4.  Hacer **Push** a la Branch (`git push origin feature/AmazingFeature`).
+5.  Abrir una **Pull Request**.
+
+También puedes abrir una `issue` con la etiqueta que corresponda.
+
+## 📄 Licencia
+
+Este proyecto está distribuido bajo la Licencia MIT. Consulta el fichero `LICENSE` para más información.
+
+---
+
+<div align="center">
+    Creado con ❤️ por un aficionado al fantasy
+</div>
