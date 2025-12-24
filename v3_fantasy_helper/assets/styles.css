@@ -1,0 +1,155 @@
+/* BOTONES GLOBALES Y ESTÉTICA */
+.stButton>button {
+    border-radius: 20px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* BOTÓN PRIMARIO (Calcular XI, Guardar Cambios) */
+.stButton[aria-label="Calcular mi XI ideal"]>button,
+.stButton[aria-label="💾 Guardar cambios"]>button {
+    color: white;
+    background-color: #4F8BF9;
+    border: 1px solid #4F8BF9;
+    font-weight: bold;
+}
+
+.stButton[aria-label="💾 Guardar cambios"]>button:disabled {
+    background-color: #374151;
+    color: #6B7280;
+    border: none;
+}
+
+/* FORMULARIO AÑADIR JUGADOR */
+form[data-testid="stForm"] button {
+    background-color: #166534;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+}
+
+/* OTROS ESTILOS */
+div[data-testid="metric-container"] {
+    background-color: rgba(230, 240, 255, 0.5);
+    border-radius: 10px; padding: 15px;
+}
+.footer {
+    position: fixed; left: 0; bottom: 0; width: 100%;
+    background-color: #ffffff; text-align: center; padding: 8px;
+    z-index: 9999; border-top: 1px solid #e0e0e0;
+}
+@media (prefers-color-scheme: dark) {
+    .footer { background-color: #0e1117; border-top: 1px solid #262730; }
+    div[data-testid="metric-container"] { background-color: rgba(38, 39, 48, 0.8); }
+}
+
+.card-container-plantilla {
+    position: relative;
+    width: 105px;
+}
+
+.player-card-plantilla {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(160deg, #2d3748, #1f2937);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-container-plantilla:hover .player-card-plantilla {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+}
+
+.player-card-plantilla .player-image-small {
+    height: 70px;
+    width: 100%;
+    overflow: hidden;
+    background-color: #1a202c;
+}
+
+.player-card-plantilla .player-image-small img {
+    width: 100%; height: 100%; object-fit: cover; object-position: top;
+}
+
+.player-card-plantilla .card-body {
+    text-align: center;
+    padding: 8px 4px;
+    flex-grow: 1;
+}
+
+.player-card-plantilla .p-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: #F9FAFB;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-card-plantilla .p-team {
+    font-size: 9px;
+    color: #A0AEC0;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+
+.player-card-plantilla .pos-pill-footer {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    text-align: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    text-transform: uppercase;
+}
+
+.delete-icon-plantilla {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 24px;
+    height: 24px;
+    background-color: #EF4444;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    text-decoration: none;
+    border: 2px solid #1f2937;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+}
+
+.card-container-plantilla:hover .delete-icon-plantilla {
+    transform: scale(1.1);
+}
+
+.delete-icon-plantilla:hover {
+    background-color: #F87171;
+}
+
+.delete-icon-plantilla svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .card-container-plantilla { width: calc(33.33% - 10px); max-width: 100px; }
+    .player-card-plantilla .p-name { font-size: 10px; }
+}
