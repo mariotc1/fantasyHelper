@@ -12,7 +12,7 @@ _Tu Asistente Inteligente para una Alineación de Fantasy Imbatible_
 
 ---
 
-<div>
+<div align="center">
 
 **Una aplicación web que lleva tu equipo de fútbol fantasy al siguiente nivel.**
 Calcula tu alineación ideal basándose en probabilidades de titularidad en tiempo real, ayudándote a tomar decisiones basadas en datos, no solo en intuición.
