@@ -21,14 +21,10 @@ Calcula tu alineación ideal basándose en probabilidades de titularidad en tiem
 
 </div>
 
-<!-- 
-    ¡Hola! Te recomiendo grabar un GIF corto mostrando la aplicación en acción y ponerlo aquí. 
-    Un buen GIF aumenta el interés en el proyecto enormemente.
     
-    <p align="center">
-      <img src="URL_A_TU_GIF_AQUÍ" alt="Demostración de Fantasy XI Assistant" width="750"/>
-    </p>
--->
+<p align="center">
+    <img src="demo.gif" alt="Demostración de Fantasy XI Assistant" width="750"/>
+</p>
 
 ## 🌟 Sobre el Proyecto
 
