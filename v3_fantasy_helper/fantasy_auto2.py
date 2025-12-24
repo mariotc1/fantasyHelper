@@ -75,17 +75,6 @@ st.markdown("""
         border: none;
     }
 
-    /* Botón Destructivo (Borrar plantilla) */
-    .stButton[aria-label="🗑️ Eliminar todos los jugadores"]>button {
-        color: white;
-        background-color: #D32F2F;
-        border-color: #D32F2F;
-    }
-    .stButton[aria-label="🗑️ Eliminar todos los jugadores"]>button:hover {
-        background-color: #C62828;
-        border-color: #C62828;
-    }
-
     /* Formulario Añadir Jugador */
     form[data-testid="stForm"] button {
         background-color: #166534;
@@ -256,11 +245,7 @@ with tab1:
                 time.sleep(0.5) # Pequeña pausa para que el usuario perciba el guardado
                 st.rerun()
 
-        # 3. Manejar acciones desde la URL (para el botón personalizado)
-        if st.query_params.get("action") == "confirm_delete":
-            st.session_state.show_confirm_dialog = True
-            st.query_params.clear()
-            st.rerun()
+
 
         if st.query_params.get("action") == "delete_player":
             player_id_to_delete = st.query_params.get("player_id")
@@ -297,13 +282,9 @@ with tab1:
 
             st.divider()
 
-        
-
             st.header("Mi plantilla")
 
-        
-
-                # --- INICIO: NUEVA VISUALIZACIÓN DE JUGADORES POR TARJETAS ---
+            # --- INICIO: NUEVA VISUALIZACIÓN DE JUGADORES POR TARJETAS ---
 
             st.markdown("""
 
@@ -657,40 +638,11 @@ with tab1:
 
             # --- Acción de Limpieza ---
 
-            st.divider()
-
-            c1, c2, c3 = st.columns([0.6, 0.4, 0.1]) 
-
-            with c2:
-
-                if st.button("🗑️ Eliminar todos los jugadores", help="Quitar todos los jugadores de la plantilla", type="primary", use_container_width=True):
-
-                    st.session_state.show_confirm_dialog = True
+            
 
         else:
 
             st.info("Añade tu primer jugador usando el formulario de arriba.")
-
-        # Lógica del diálogo de confirmación para eliminar todos los jugadores
-        if "show_confirm_dialog" not in st.session_state:
-            st.session_state.show_confirm_dialog = False
-
-        if st.session_state.show_confirm_dialog:
-            @st.dialog("Confirmar eliminación total")
-            def confirm_delete_all():
-                st.warning("¿Estás seguro de que quieres eliminar todos los jugadores de tu plantilla? Esta acción no se puede deshacer.", icon="⚠️")
-                
-                d_c1, d_c2 = st.columns(2)
-                if d_c1.button("Sí, eliminar plantilla", type="primary"):
-                    st.session_state.plantilla_bloques = []
-                    st.session_state.show_confirm_dialog = False
-                    st.rerun()
-
-                if d_c2.button("Cancelar"):
-                    st.session_state.show_confirm_dialog = False
-                    st.rerun()
-            
-            confirm_delete_all()
 
         # Lógica del diálogo de confirmación para eliminar un jugador individual
         if "show_confirm_delete_player" not in st.session_state:
@@ -760,6 +712,7 @@ with tab1:
             st.warning("⚠️ Se han detectado y eliminado jugadores duplicados.", icon="❗")
             df_plantilla = df_plantilla.drop_duplicates(subset=['Nombre'], keep='first')
 
+        st.divider()
         st.success(f"✅ Plantilla cargada con **{len(df_plantilla)}** jugadores. Comprueba las coincidencias a continuación:")
         
         # Emparejar jugadores con datos de LaLiga
