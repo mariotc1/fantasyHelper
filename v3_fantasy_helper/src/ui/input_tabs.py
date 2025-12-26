@@ -80,6 +80,8 @@ def render_manual_input_method(nombres_laliga, df_laliga):
                     pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
                     st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
                     st.rerun()
+            else:
+                st.toast("Debes seleccionar un nombre y una posición.", icon="⚠️")
 
     # Renderizar la plantilla actual
     if st.session_state.plantilla_bloques:
