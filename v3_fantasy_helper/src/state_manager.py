@@ -11,7 +11,12 @@ def initialize_session_state(localS):
     """
     if "plantilla_bloques" not in st.session_state:
         plantilla_guardada_str = localS.getItem("fantasy_plantilla")
-        st.session_state.plantilla_bloques = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
+        try:
+            st.session_state.plantilla_bloques = json.loads(plantilla_guardada_str) if plantilla_guardada_str else []
+        except (json.JSONDecodeError, TypeError):
+            st.error("⚠️ No se pudo cargar tu plantilla guardada porque los datos estaban corruptos. Empezando con una plantilla vacía.", icon="🚨")
+            st.session_state.plantilla_bloques = []
+
         
         pos_order = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
         st.session_state.plantilla_bloques.sort(key=lambda p: pos_order.get(p.get("Posicion"), 99))
@@ -48,10 +53,15 @@ def handle_player_deletion_from_url():
     if st.query_params.get("action") == "delete_player":
         player_id_to_delete = st.query_params.get("player_id")
         if player_id_to_delete:
-            st.session_state.show_confirm_delete_player = True
-            st.session_state.player_to_delete_id = int(player_id_to_delete)
-            st.query_params.clear()
-            st.rerun()
+            try:
+                st.session_state.show_confirm_delete_player = True
+                st.session_state.player_to_delete_id = int(player_id_to_delete)
+                st.query_params.clear()
+                st.rerun()
+            except (ValueError, TypeError):
+                # Si el player_id no es un entero válido, simplemente lo ignoramos.
+                st.query_params.clear()
+                st.rerun()
 
 
 def confirm_player_delete_dialog():

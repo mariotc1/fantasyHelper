@@ -26,8 +26,11 @@ def render_results_tab(df_plantilla, df_laliga, cutoff, tactica):
         if df_encontrados.empty:
             st.error("No se pudo emparejar ningún jugador. Revisa los nombres o baja la 'Sensibilidad' en la barra lateral.")
         else:
-            xi_lista = seleccionar_mejor_xi(df_encontrados, min_def, max_def, min_cen, max_cen, min_del, max_del, num_por, total)
-            if not xi_lista or len(xi_lista) < 11:
+            xi_lista, error_msg = seleccionar_mejor_xi(df_encontrados, min_def, max_def, min_cen, max_cen, min_del, max_del, num_por, total)
+            
+            if error_msg:
+                st.error(f"🚨 {error_msg}")
+            elif not xi_lista or len(xi_lista) < 11:
                 st.error("No se pudo construir un XI con las restricciones tácticas. Intenta flexibilizar los mínimos/máximos.")
             else:
                 st.session_state.df_xi = pd.DataFrame(xi_lista)

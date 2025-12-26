@@ -22,7 +22,8 @@ def generar_pdf_xi(df_xi: pd.DataFrame) -> bytes:
         pdf.ln(5)
         pdf.set_font("Arial", "B", 14)
         pdf.cell(0, 10, f"Media de probabilidad del XI: {media:.1f}%", ln=True, align="C")
-    except Exception:
+    except (KeyError, TypeError, ZeroDivisionError):
+        # Si hay un error al calcular la media (p.ej. df vacío, columna no existe), simplemente no se añade.
         pass
         
     return pdf.output(dest='S').encode('latin1')

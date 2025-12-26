@@ -47,7 +47,7 @@ def emparejar_con_datos(plantilla_df, datos_df, cutoff=0.6):
 
 # Selecciona el mejor XI posible basándose en la probabilidad y las restricciones tácticas
 def seleccionar_mejor_xi(df, min_def=3, max_def=5, min_cen=3, max_cen=5, min_del=1, max_del=3, num_por=1, total=11):
-    if df.empty: return []
+    if df.empty: return [], "El dataframe de jugadores está vacío."
     
     df = df.copy()
     df["Posicion"] = df["Posicion"].apply(normaliza_pos)
@@ -59,6 +59,12 @@ def seleccionar_mejor_xi(df, min_def=3, max_def=5, min_cen=3, max_cen=5, min_del
     cen = df[df["Posicion"] == "CEN"].sort_values("Probabilidad_num", ascending=False)
     deln = df[df["Posicion"] == "DEL"].sort_values("Probabilidad_num", ascending=False)
     
+    # Validaciones previas para una mejor experiencia de usuario
+    if len(por) < num_por: return [], f"No tienes suficientes porteros (necesitas {num_por} y tienes {len(por)})."
+    if len(defn) < min_def: return [], f"No tienes suficientes defensas (necesitas {min_def} y tienes {len(defn)})."
+    if len(cen) < min_cen: return [], f"No tienes suficientes centrocampistas (necesitas {min_cen} y tienes {len(cen)})."
+    if len(deln) < min_del: return [], f"No tienes suficientes delanteros (necesitas {min_del} y tienes {len(deln)})."
+
     # Seleccionar jugadores mínimos obligatorios
     eleccion = []
     eleccion.extend(por.head(num_por).to_dict("records"))
@@ -81,4 +87,8 @@ def seleccionar_mejor_xi(df, min_def=3, max_def=5, min_cen=3, max_cen=5, min_del
     orden_pos = {"POR": 0, "DEF": 1, "CEN": 2, "DEL": 3}
     eleccion = sorted(eleccion, key=lambda x: orden_pos.get(x.get("Posicion", ""), 99))
     
-    return eleccion[:total]
+    final_xi = eleccion[:total]
+    if len(final_xi) < total:
+        return [], f"No se pudo completar un XI de {total} jugadores con tu plantilla y táctica. Solo se pudieron seleccionar {len(final_xi)}."
+
+    return final_xi, None

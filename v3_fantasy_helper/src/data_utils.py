@@ -17,19 +17,22 @@ def normaliza_pos(p):
     p = p.strip().upper()
     if p in ("POR", "GK", "PT"): return "POR"
     if p in ("DEF", "DF", "D"): return "DEF"
-    if p in ("CEN", "MED", "MC", "M"): return "CEN"
-    if p in ("DEL", "DC", "FW", "ST"): return "DEL"
-    return p
+    if p in ("CEN", "MED", "MC", "M", "MID"): return "CEN"
+    if p in ("DEL", "DC", "FW", "ST", "F"): return "DEL"
+    return None # Devuelve None si no es una posición reconocida
 
 # Parsea un texto multilínea con datos de jugadores y lo convierte en un DataFrame
 def parsear_plantilla_pegada(texto):
     filas = []
+    # Lista extendida de posibles posiciones para la expresión regular
+    pos_regex = "POR|GK|PT|DEF|DF|D|CEN|MED|MC|M|MID|DEL|DC|FW|ST|F"
+
     for linea in texto.splitlines():
         linea = linea.strip()
         if not linea: continue
 
         # Expresión regular para capturar nombre, posición y precio
-        match = re.match(r"^(.*?)(?:[;,]|\s+)\s*(POR|DEF|CEN|DEL|GK|DF|MC|DC|FW)\s*(?:[;,]|\s+)?(.*)$", linea, re.IGNORECASE)
+        match = re.match(rf"^(.*?)(?:[;,]|\s+)\s*({pos_regex})\s*(?:[;,]|\s+)?(.*)$", linea, re.IGNORECASE)
 
         if match:
             nombre = match.group(1).strip()
@@ -41,7 +44,7 @@ def parsear_plantilla_pegada(texto):
             if len(trozos) >= 2:
                 pos = trozos[-1]
                 nombre = " ".join(trozos[:-1])
-                if normaliza_pos(pos) in ["POR", "DEF", "CEN", "DEL"]:
+                if normaliza_pos(pos): # Usamos la función para verificar si es una posición válida
                      filas.append({"Nombre": nombre, "Posicion": pos, "Precio": None})
     
     if not filas:
