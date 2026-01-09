@@ -6,7 +6,7 @@ from streamlit_local_storage import LocalStorage
 
 # IMPORTACIONES DE FUNCIONES INTERNAS
 from src.scraper import scrape_laliga
-from src.state_manager import initialize_session_state, autosave_plantilla
+from src.state_manager import initialize_session_state, autosave_plantilla, emergency_data_recovery
 from src.ui.sidebar import render_sidebar
 from src.ui.input_tabs import render_input_tabs
 from src.ui.results_tab import render_results_tab
@@ -58,6 +58,12 @@ nombres_laliga = sorted(df_laliga["Nombre"].unique())
 
 # 2. INICIALIZACIÓN Y GESTIÓN DE ESTADO
 initialize_session_state(localS)
+
+# 2.1. RECUPERACIÓN DE EMERGENCIA PARA DISPOSITIVOS ANDROID
+if not st.session_state.plantilla_bloques:
+    if emergency_data_recovery(localS):
+        st.stop()  # Detener si se encontraron datos para recuperar
+
 autosave_plantilla(localS)
 
 
