@@ -41,7 +41,8 @@ def autosave_plantilla(localS):
             localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
             st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
             st.toast("Cambios guardados automáticamente!", icon="💾")
-
+            time.sleep(0.5)
+            st.rerun()
 
 def handle_player_deletion_from_url():
     """
@@ -55,9 +56,11 @@ def handle_player_deletion_from_url():
                 st.session_state.show_confirm_delete_player = True
                 st.session_state.player_to_delete_id = int(player_id_to_delete)
                 st.query_params.clear()
+                st.rerun()
             except (ValueError, TypeError):
                 # Si el player_id no es un entero válido, simplemente lo ignoramos.
                 st.query_params.clear()
+                st.rerun()
 
 
 def confirm_player_delete_dialog():
@@ -85,10 +88,12 @@ def confirm_player_delete_dialog():
                 st.session_state.plantilla_bloques = [p for p in st.session_state.plantilla_bloques if p.get('id') != player_id_to_delete]
                 st.session_state.show_confirm_delete_player = False
                 del st.session_state.player_to_delete_id
+                st.rerun()
 
             if d_c2.button("Cancelar"):
                 st.session_state.show_confirm_delete_player = False
                 del st.session_state.player_to_delete_id
+                st.rerun()
         
         if player_to_delete:
             confirm_dialog_ui()
