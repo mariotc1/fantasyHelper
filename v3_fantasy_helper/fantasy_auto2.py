@@ -44,6 +44,50 @@ localS = LocalStorage()
 st.title("Fantasy XI Assistant")
 st.caption("Calcula tu alineación ideal con datos de probabilidad en tiempo real")
 
+# PANEL DE DIAGNÓSTICO (solo visible en desarrollo o cuando se activa)
+if st.sidebar.checkbox("🔧 Modo Debug/Diagnóstico", help="Activa el diagnóstico para detectar problemas en Android"):
+    st.session_state.debug_mode = True
+    
+    # Mostrar información del dispositivo
+    from src.state_manager import detect_device_info, log_debug_info
+    device_info = detect_device_info()
+    st.sidebar.success(f"📱 Dispositivo detectado: {device_info}")
+    
+    # Botón para ver log de debug
+    if st.sidebar.button("📋 Ver Log de Debug"):
+        if "debug_log" in st.session_state and st.session_state.debug_log:
+            st.sidebar.write("**Log de eventos:**")
+            for i, entry in enumerate(st.session_state.debug_log[-20:]):  # Últimos 20 eventos
+                with st.sidebar.expander(f"{entry['timestamp']} - {entry['message']}"):
+                    if entry.get('data'):
+                        st.json(entry['data'])
+        else:
+            st.sidebar.write("No hay eventos en el log")
+    
+    # Botón para forzar diagnóstico completo
+    if st.sidebar.button("🔍 Diagnóstico Completo"):
+        from src.state_manager import safe_get_item
+        test_result = safe_get_item(localS, "fantasy_plantilla", "TEST_FALLBACK")
+        st.sidebar.json({
+            "localStorage_test": test_result,
+            "session_state_plantilla": len(st.session_state.get("plantilla_bloques", [])),
+            "device_info": device_info
+        })
+    
+    # Botón de guardado manual forzado
+    if st.sidebar.button("💾 Guardar Manual Forzado", help="Fuerza el guardado de la plantilla actual"):
+        from src.state_manager import force_manual_save
+        force_manual_save(localS)
+        
+else:
+    st.session_state.debug_mode = False
+
+# BOTÓN DE GUARDADO MANUAL PARA TODOS LOS USUARIOS (visible si hay jugadores)
+if st.session_state.get("plantilla_bloques") and len(st.session_state.plantilla_bloques) > 0:
+    if st.sidebar.button("📱 Guardar Cambios Ahora", help="Guarda manualmente tu plantilla (para Android)"):
+        from src.state_manager import force_manual_save
+        force_manual_save(localS)
+
 
 # FLUJO PRINCIPAL DE LA APLICACIÓN 
 
