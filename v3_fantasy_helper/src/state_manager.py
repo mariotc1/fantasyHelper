@@ -26,6 +26,11 @@ def initialize_session_state(localS):
     
     if "previous_plantilla" not in st.session_state:
         st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
+    
+    # Forzar sincronización inicial en Android para asegurar consistencia
+    if st.session_state.plantilla_bloques and not localS.getItem("fantasy_plantilla"):
+        localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
+        st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
 
 
 def autosave_plantilla(localS):
@@ -41,8 +46,7 @@ def autosave_plantilla(localS):
             localS.setItem("fantasy_plantilla", json.dumps(st.session_state.plantilla_bloques))
             st.session_state.previous_plantilla = st.session_state.plantilla_bloques.copy()
             st.toast("Cambios guardados automáticamente!", icon="💾")
-            time.sleep(0.5)
-            st.rerun()
+            # Eliminado st.rerun() redundante para evitar condición de carrera en Android
 
 def handle_player_deletion_from_url():
     """
@@ -87,12 +91,14 @@ def confirm_player_delete_dialog():
             if d_c1.button("Sí, eliminar", type="primary"):
                 st.session_state.plantilla_bloques = [p for p in st.session_state.plantilla_bloques if p.get('id') != player_id_to_delete]
                 st.session_state.show_confirm_delete_player = False
-                del st.session_state.player_to_delete_id
+                if "player_to_delete_id" in st.session_state:
+                    del st.session_state.player_to_delete_id
                 st.rerun()
 
             if d_c2.button("Cancelar"):
                 st.session_state.show_confirm_delete_player = False
-                del st.session_state.player_to_delete_id
+                if "player_to_delete_id" in st.session_state:
+                    del st.session_state.player_to_delete_id
                 st.rerun()
         
         if player_to_delete:
