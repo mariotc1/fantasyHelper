@@ -104,6 +104,9 @@ def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
                 padding: 4px;
                 opacity: 0.4;
                 transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
             }
             .player-row-pro:hover .delete-button-pro {
                 opacity: 1;
@@ -151,37 +154,14 @@ def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
                     <span class="position-chip {pos_class}">{posicion}</span>
                 </div>
                 <div class="player-actions">
-                    <button class="delete-button-pro" aria-label="Eliminar a {nombre}" onclick="deletePlayer('{player_id}')">
+                    <a href="?action=delete_player&player_id={player_id}" class="delete-button-pro" title="Eliminar a {nombre}">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
                         </svg>
-                    </button>
+                    </a>
                 </div>
             </div>
         """
-
-    # JAVASCRIPT
-    js_script = """
-        <script>
-            function deletePlayer(playerId) {
-                // OBTENER LA PLANTILLA DESDE LOCALSTORAGE
-                let plantillaStr = localStorage.getItem('fantasy_plantilla');
-                if (plantillaStr) {
-                    let plantilla = JSON.parse(plantillaStr);
-                    
-                    // FILTRAR EL JUGADOR A ELIMINAR
-                    // Asegurarse de comparar tipos correctos (string vs number)
-                    let updatedPlantilla = plantilla.filter(p => String(p.id) !== String(playerId));
-                    
-                    // GUARDAR LA PLANTILLA ACTUALIZADA EN LOCALSTORAGE
-                    localStorage.setItem('fantasy_plantilla', JSON.stringify(updatedPlantilla));
-                    
-                    // FORZAR RECARGA DE LA PÁGINA
-                    window.parent.location.reload();
-                }
-            }
-        </script>
-    """
 
     full_html = f"""
         <!DOCTYPE html>
@@ -195,7 +175,6 @@ def generar_html_lista_jugadores_editable(df_jugadores: pd.DataFrame) -> str:
                 <div class="player-list-pro">
                     {''.join(rows_html)}
                 </div>
-                {js_script}
             </body>
         </html>
     """
